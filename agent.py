@@ -3,6 +3,7 @@ import random
 TILE_GOAL = 16
 
 STATE_COUNT = 16
+ACTION_COUNT = 4
 
 class Agent():
     def __init__(self):
