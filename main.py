@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import simpledialog
+from tkinter import filedialog
+import pickle
 
 from collections import namedtuple
 
@@ -10,6 +12,8 @@ DEFAULT_TILEH = 32
 
 TILE_WALL = -1
 TILE_GOAL = 16
+
+SavedWorld = namedtuple("SavedWorld", ["actor", "w", "h", "tiles"])
 
 class ResizeDlg(simpledialog.Dialog):
     def __init__(self, master, w, h):
@@ -63,13 +67,21 @@ class GridWorld(Tk):
         # Set up window
         self.title("GridWorld")
         self.bind("<Escape>", self._close)
+        self.bind("<Control-s>", self.cmd_save)
+        self.bind("<Control-o>", self.cmd_open)
+        self.bind("<Control-r>", self.cmd_resize)
         
         # Set up menu bar
         self.menu = Menu(self)
         
-        self.filemenu = Menu(self.menu, tearoff = 0)
-        self.filemenu.add_command(label="Resize", command=self.cmd_resize)
-        self.menu.add_cascade(label="Options", menu=self.filemenu)
+        self.filemenu = Menu(self.menu,tearoff = 0)
+        self.filemenu.add_command(label="Save", command=self.cmd_save)
+        self.filemenu.add_command(label="Open", command=self.cmd_open)
+        self.menu.add_cascade(label="File", menu=self.filemenu)
+        
+        self.optmenu = Menu(self.menu, tearoff = 0)
+        self.optmenu.add_command(label="Resize", command=self.cmd_resize)
+        self.menu.add_cascade(label="Options", menu=self.optmenu)
         
         self.config(menu = self.menu)
         
@@ -172,13 +184,50 @@ class GridWorld(Tk):
                                         text = "{}".format(self.tiles[t]))
             
         
-    def cmd_resize(self):
+    def cmd_resize(self, event=None):
         resize = ResizeDlg(self, self.w, self.h)
         
         # Resize is good to go
         if resize.result:
             w, h = resize.result
             self.resize(w, h)
+            
+    def cmd_save(self, event=None):
+        opts = {}
+        opts["defaultextension"] = ".gwd"
+        opts["filetypes"] = [("GridWorlds", ".gwd")]
+        opts["parent"] = self
+        opts["initialdir"] = "./worlds"
+        opts["title"] = "Save world"
+        
+        f = filedialog.asksaveasfile(mode="wb+", **opts)
+        if not f: return
+        
+        world = SavedWorld(self.actor, self.w, self.h, self.tiles)
+        pickle.dump(world, f)
+        f.close()
+        
+    def cmd_open(self, event=None):
+        opts = {}
+        opts["defaultextension"] = ".gwd"
+        opts["filetypes"] = [("GridWorlds", ".gwd")]
+        opts["parent"] = self
+        opts["initialdir"] = "./worlds"
+        opts["title"] = "Load world"
+        
+        f = filedialog.askopenfile(mode="rb", **opts)
+        if not f: return
+        
+        world = pickle.load(f)
+        f.close()
+        
+        self.resize(world.w, world.h)
+        self.tiles = world.tiles[:]
+        for t in range(self.w * self.h):
+            self._updt_tile(t)
+        self.actor = world.actor
+            
+        self.redraw()
         
     def _postoindex(self, x, y):
         return x + y * self.w
