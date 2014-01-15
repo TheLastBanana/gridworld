@@ -56,14 +56,26 @@ class GridWorld(Tk):
                  tileW = DEFAULT_TILEW, tileH = DEFAULT_TILEH):
         Tk.__init__(self)
         
+        # The current agent type
+        self.agent = agent.Agent()
+        
         # Store whether mouse is currently creating or destroying walls
         self.makewall = True
         
         # Store whether the agent is being dragged
         self.dragagent = False
         
+        # Where the agent will start
+        self.agentstart = 0
+        
         # The agent's tile index
-        self.agentindex = 0
+        self.agentindex = self.agentstart
+        
+        # ID of the running agent alarm
+        self.agentalarm = None
+        
+        # How often the agent makes a step (in milliseconds)
+        self.agenttime = 1
         
         # Set up window
         self.title("GridWorld")
@@ -71,6 +83,7 @@ class GridWorld(Tk):
         self.bind("<Control-s>", self.cmd_save)
         self.bind("<Control-o>", self.cmd_open)
         self.bind("<Control-r>", self.cmd_resize)
+        self.bind("<space>", self.cmd_run)
         
         # Set up menu bar
         self.menu = Menu(self)
@@ -100,8 +113,10 @@ class GridWorld(Tk):
         self.canvas.bind("<Button-3>", self._canv_rclick)
         self.canvas.pack()
         
-        test = Button(self)
-        test.pack()
+        self.run_btn = Button(self)
+        self.run_btn["text"] = "Run"
+        self.run_btn["command"] = self.cmd_run
+        self.run_btn.pack()
         
         self.resize(w, h)
     
@@ -109,7 +124,7 @@ class GridWorld(Tk):
         """
         Gets the current state.
         """
-        return self.tiles[agentindex]
+        return self.tiles[self.agentindex]
     
     def sample(self, action):
         """
@@ -120,10 +135,10 @@ class GridWorld(Tk):
             2 = go left
             3 = go down
         """
-        x, y = _indextopos(self.agentindex)
+        x, y = self._indextopos(self.agentindex)
         x += int(action == 0) - (action == 2)
         y += int(action == 3) - (action == 1)
-        newindex = _postoindex(x, y)
+        newindex = self._postoindex(x, y)
         
         if not(x < 0 or y < 0 or x > self.w - 1 or y > self.h - 1
             or self.tiles[newindex] == TILE_WALL):
@@ -213,7 +228,18 @@ class GridWorld(Tk):
                                         y + self.tileH * 0.5,
                                         text = "{}".format(self.tiles[t]))
             
-        
+    def cmd_run(self, event=None):
+        # If there's an alarm running, pause
+        if self.agentalarm:
+            self.after_cancel(self.agentalarm)
+            self.run_btn["text"] = "Run"
+            self.agentalarm = None
+            
+        else:
+            # Set a new alarm
+            self.agentalarm = self.after(self.agenttime, self.step_agent)
+            self.run_btn["text"] = "Pause"
+    
     def cmd_resize(self, event=None):
         resize = ResizeDlg(self, self.w, self.h)
         
@@ -258,6 +284,15 @@ class GridWorld(Tk):
         self.agentindex = world.agentindex
             
         self.redraw()
+        
+    def step_agent(self):
+        """
+        Make the agent take one step.
+        """
+        self.agent.do_step(self.get_state(), self.sample)
+        self.redraw()
+        
+        self.agentalarm = self.after(self.agenttime, self.step_agent)
         
     def _postoindex(self, x, y):
         return x + y * self.w
