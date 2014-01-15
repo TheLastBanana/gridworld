@@ -14,7 +14,7 @@ DEFAULT_TILEH = 32
 TILE_WALL = -1
 TILE_GOAL = 16
 
-SavedWorld = namedtuple("SavedWorld", ["agentindex", "w", "h", "tiles"])
+SavedWorld = namedtuple("SavedWorld", ["agentstart", "w", "h", "tiles"])
 
 class ResizeDlg(simpledialog.Dialog):
     def __init__(self, master, w, h):
@@ -77,13 +77,20 @@ class GridWorld(Tk):
         # How often the agent makes a step (in milliseconds)
         self.agenttime = 1
         
+        # Whether the simulation has been started yet
+        self.running = False
+        
+        # Whether the agent will be starting a new episode next step.
+        self.new_episode = False
+        
         # Set up window
         self.title("GridWorld")
         self.bind("<Escape>", self._close)
         self.bind("<Control-s>", self.cmd_save)
         self.bind("<Control-o>", self.cmd_open)
         self.bind("<Control-r>", self.cmd_resize)
-        self.bind("<space>", self.cmd_run)
+        self.bind("<space>", self.cmd_runpause)
+        self.bind("<r>", self.cmd_reset)
         
         # Set up menu bar
         self.menu = Menu(self)
@@ -114,9 +121,15 @@ class GridWorld(Tk):
         self.canvas.pack()
         
         self.run_btn = Button(self)
-        self.run_btn["text"] = "Run"
-        self.run_btn["command"] = self.cmd_run
+        self.run_btn["command"] = self.cmd_runpause
         self.run_btn.pack()
+        
+        self.reset_btn = Button(self)
+        self.reset_btn["text"] = "Reset"
+        self.reset_btn["command"] = self.cmd_reset
+        self.reset_btn.pack()
+        
+        self.update_buttons()
         
         self.resize(w, h)
     
@@ -146,6 +159,11 @@ class GridWorld(Tk):
             self.agentindex = newindex
         
         newstate = self.get_state()
+        
+        # Start a new episode for the agent if it has reached its goal.
+        if newstate == TILE_GOAL:
+            self.new_episode = True
+        
         return newstate, 1 if newstate == TILE_GOAL else 0
         
     def resize(self, w, h):
@@ -154,7 +172,7 @@ class GridWorld(Tk):
         """
         self.w = w
         self.h = h
-        self.agentindex = 0
+        self.agentindex = self.agentstart = 0
         
         newW = self.w * self.tileW
         newH = self.h * self.tileH
@@ -199,8 +217,8 @@ class GridWorld(Tk):
             # Draw wall
             if self.tiles[t] == TILE_WALL:
                 filled = True
-                self.canvas.create_rectangle(x,
-                                             y,
+                self.canvas.create_rectangle(x + 1,
+                                             y + 1,
                                              x + self.tileW,
                                              y + self.tileH,
                                              fill="black")
@@ -213,6 +231,13 @@ class GridWorld(Tk):
                                              y + self.tileH,
                                              fill="green",
                                              outline="green")
+            elif self.agentstart == t:
+                self.canvas.create_rectangle(x + 1,
+                                             y + 1,
+                                             x + self.tileW,
+                                             y + self.tileH,
+                                             fill="yellow",
+                                             outline="yellow")
             
             # Draw agent
             if self.agentindex == t:
@@ -227,18 +252,31 @@ class GridWorld(Tk):
                 self.canvas.create_text(x + self.tileW * 0.5,
                                         y + self.tileH * 0.5,
                                         text = "{}".format(self.tiles[t]))
-            
-    def cmd_run(self, event=None):
+    
+    def update_buttons(self):
+            self.run_btn["text"] = "Pause" if self.agentalarm else "Run"
+            self.reset_btn["state"] = NORMAL if self.running else DISABLED
+    
+    def cmd_runpause(self, event=None):
         # If there's an alarm running, pause
         if self.agentalarm:
-            self.after_cancel(self.agentalarm)
-            self.run_btn["text"] = "Run"
-            self.agentalarm = None
-            
+            self.pause()
         else:
-            # Set a new alarm
-            self.agentalarm = self.after(self.agenttime, self.step_agent)
-            self.run_btn["text"] = "Pause"
+            self.resume()
+            
+    def cmd_reset(self, event=None):
+        if not self.running: return
+        
+        # Reset the agent
+        self.agent.reset()
+        self.agentindex = self.agentstart
+        
+        # Stop the agent from running
+        self.pause()
+        self.running = False
+        
+        self.redraw()
+        self.update_buttons()
     
     def cmd_resize(self, event=None):
         resize = ResizeDlg(self, self.w, self.h)
@@ -259,7 +297,7 @@ class GridWorld(Tk):
         f = filedialog.asksaveasfile(mode="wb+", **opts)
         if not f: return
         
-        world = SavedWorld(self.agentindex, self.w, self.h, self.tiles)
+        world = SavedWorld(self.agentstart, self.w, self.h, self.tiles)
         pickle.dump(world, f)
         f.close()
         
@@ -281,7 +319,7 @@ class GridWorld(Tk):
         self.tiles = world.tiles[:]
         for t in range(self.w * self.h):
             self._updt_tile(t)
-        self.agentindex = world.agentindex
+        self.agentindex = self.agentstart = world.agentstart
             
         self.redraw()
         
@@ -289,10 +327,38 @@ class GridWorld(Tk):
         """
         Make the agent take one step.
         """
+        # Start a new episode
+        if self.new_episode:
+            self.agentindex = self.agentstart
+            self.agent.init_episode()
+            self.new_episode = False
+        
         self.agent.do_step(self.get_state(), self.sample)
         self.redraw()
         
         self.agentalarm = self.after(self.agenttime, self.step_agent)
+        
+    def resume(self):
+        """
+        Resume the simulation.
+        """
+        # Set a new alarm
+        self.agentalarm = self.after(self.agenttime, self.step_agent)
+        self.running = True
+        
+        self.update_buttons()
+        
+    def pause(self):
+        """
+        Pause the simulation.
+        """
+        if not self.agentalarm:
+            return
+        
+        self.after_cancel(self.agentalarm)
+        self.agentalarm = None
+        
+        self.update_buttons()
         
     def _postoindex(self, x, y):
         return x + y * self.w
@@ -350,8 +416,11 @@ class GridWorld(Tk):
         """
         Called when the canvas is left-clicked.
         """
-        pos = self._screentotiles(event.x, event.y)
-        ind = self._postoindex(*pos)
+        x, y = self._screentotiles(event.x, event.y)
+        if x < 0 or x > self.w - 1 or y < 0 or y > self.h - 1:
+            return
+        
+        ind = self._postoindex(x, y)
         
         # Start dragging agent
         if self.agentindex == ind:
@@ -377,11 +446,13 @@ class GridWorld(Tk):
             # Don't drag into wall
             if self.tiles[ind] != TILE_WALL:
                 self.agentindex = ind
+                if not self.running: self.agentstart = ind
         
         # Draw walls
         else:
             # Can't draw over goal
-            if self.tiles[ind] == TILE_GOAL or self.agentindex == ind:
+            if self.tiles[ind] == TILE_GOAL or self.agentindex == ind or \
+                self.agentstart == ind:
                 return
             
             # Make position a wall/empty
