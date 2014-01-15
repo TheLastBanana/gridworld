@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import simpledialog
 from tkinter import filedialog
-import agent
+import agent, Qlearning
 import gridworld
 import math
 
@@ -49,7 +49,7 @@ class GUI(Tk):
         Tk.__init__(self)
         
         # The current agent type
-        self.agent = agent.Agent()
+        self.agent = Qlearning.Qlearning()#agent.Agent()
         
         # Store whether mouse is currently creating or destroying walls
         self.makewall = True
