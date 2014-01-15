@@ -3,6 +3,7 @@ from tkinter import simpledialog
 from tkinter import filedialog
 import agent
 import gridworld
+import math
 
 DEFAULT_TILEW = 32
 DEFAULT_TILEH = 32
@@ -70,7 +71,6 @@ class GUI(Tk):
         
         # The grid world
         self.gw = gridworld.GridWorld()
-        self.gw.goalcallback = self._goalcallback
         
         # Set up window
         self.title("GridWorld")
@@ -219,11 +219,31 @@ class GUI(Tk):
                                         y + self.tileH - 2,
                                         fill="red")
             
-            # Draw tile number
-            if not filled and self.show_nums.get():
-                self.canvas.create_text(x + self.tileW * 0.5,
-                                        y + self.tileH * 0.5,
-                                        text = "{}".format(self.gw.tiles[t]))
+            # Draw tile insides
+            if not filled:
+                midX = x + self.tileW * 0.5
+                midY = y + self.tileH * 0.5
+                
+                S = self.gw.tiles[t]
+                maxlen = max(self.agent.Q[S])
+                                            
+                # Draw action weights
+                for A in range(agent.ACTION_COUNT):
+                    ang = A * math.pi * 0.5
+                    l = self.agent.Q[S][A] / maxlen * self.tileW * 0.5
+                    lX = l * math.cos(ang)
+                    lY = -l * math.sin(ang)
+                    
+                    self.canvas.create_line(midX,
+                                            midY,
+                                            midX + lX,
+                                            midY + lY)
+                
+                # Draw number
+                if self.show_nums.get():
+                    self.canvas.create_text(midX,
+                                            midY,
+                                            text = "{}".format(self.gw.tiles[t]))
         
         # Horizontal lines
         for x in range(self.gw.w):
@@ -315,7 +335,7 @@ class GUI(Tk):
         Make the agent take one step.
         """
         # Start a new episode
-        if self.new_episode:
+        if self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL:
             self.gw.initworld()
             self.agent.init_episode()
             self.new_episode = False
@@ -431,12 +451,6 @@ class GUI(Tk):
         
         # Redraw
         self.redraw()
-        
-    def _goalcallback(self):
-        """
-        Called when the goal is reached in the gridworld.
-        """
-        self.new_episode = True
             
     def _close(self, event=None):
         self.destroy()

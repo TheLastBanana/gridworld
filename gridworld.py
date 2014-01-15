@@ -15,9 +15,8 @@ class GridWorld():
     """
     A tile-based world with a single agent.
     """
-    def __init__(self, w=DEFAULT_W, h=DEFAULT_W, goalcallback=None):
+    def __init__(self, w=DEFAULT_W, h=DEFAULT_W):
         self.resize(w, h)
-        self.goalcallback = goalcallback
         
     def resize(self, w, h):
         """
@@ -67,10 +66,6 @@ class GridWorld():
             self.agentindex = newindex
         
         newstate = self.get_state()
-        
-        # We've reached the goal!
-        if newstate == TILE_GOAL:
-            if self.goalcallback: self.goalcallback()
         
         return newstate, 1 if newstate == TILE_GOAL else 0
         
