@@ -1,5 +1,6 @@
 import random
 from pylab import *
+from tkinter import *
 
 TILE_GOAL = 16
 
