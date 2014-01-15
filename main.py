@@ -75,7 +75,7 @@ class GridWorld(Tk):
         self.agentalarm = None
         
         # How often the agent makes a step (in milliseconds)
-        self.agenttime = 1
+        self.agentrate = 1
         
         # Whether the simulation has been started yet
         self.running = False
@@ -118,16 +118,31 @@ class GridWorld(Tk):
         self.canvas.bind("<B1-Motion>", self._canv_lmove)
         self.canvas.bind("<ButtonRelease-1>", self._canv_lrelease)
         self.canvas.bind("<Button-3>", self._canv_rclick)
-        self.canvas.pack()
+        self.canvas.grid(row=0, columnspan=2)
         
         self.run_btn = Button(self)
         self.run_btn["command"] = self.cmd_runpause
-        self.run_btn.pack()
+        self.run_btn.grid(row=1)
         
         self.reset_btn = Button(self)
         self.reset_btn["text"] = "Reset"
         self.reset_btn["command"] = self.cmd_reset
-        self.reset_btn.pack()
+        self.reset_btn.grid(row=2)
+        
+        self.rate_scl = Scale(self)
+        self.rate_scl["from"] = 0
+        self.rate_scl["to"] = 3
+        self.rate_scl["resolution"] = -1
+        self.rate_scl["orient"] = HORIZONTAL
+        self.rate_scl["length"] = 200
+        self.rate_scl["showvalue"] = 0
+        self.rate_scl["command"] = self.update_rate
+        self.rate_scl.grid(row=2, column=1)
+        
+        self.rate_text = Label(self)
+        self.rate_text.grid(row=1, column=1)
+        
+        self.update_rate()
         
         self.update_buttons()
         
@@ -185,7 +200,6 @@ class GridWorld(Tk):
         # Resize canvas
         self.canvas["width"] = newW
         self.canvas["height"] = newH
-        self.canvas.pack()
         
         self.redraw()
         
@@ -254,8 +268,12 @@ class GridWorld(Tk):
                                         text = "{}".format(self.tiles[t]))
     
     def update_buttons(self):
-            self.run_btn["text"] = "Pause" if self.agentalarm else "Run"
-            self.reset_btn["state"] = NORMAL if self.running else DISABLED
+        self.run_btn["text"] = "Pause" if self.agentalarm else "Run"
+        self.reset_btn["state"] = NORMAL if self.running else DISABLED
+            
+    def update_rate(self, event=None):
+        self.agentrate = int(10 ** self.rate_scl.get())
+        self.rate_text["text"] = "Rate: {:d} ms/step".format(self.agentrate)
     
     def cmd_runpause(self, event=None):
         # If there's an alarm running, pause
@@ -336,14 +354,14 @@ class GridWorld(Tk):
         self.agent.do_step(self.get_state(), self.sample)
         self.redraw()
         
-        self.agentalarm = self.after(self.agenttime, self.step_agent)
+        self.agentalarm = self.after(self.agentrate, self.step_agent)
         
     def resume(self):
         """
         Resume the simulation.
         """
         # Set a new alarm
-        self.agentalarm = self.after(self.agenttime, self.step_agent)
+        self.agentalarm = self.after(self.agentrate, self.step_agent)
         self.running = True
         
         self.update_buttons()
