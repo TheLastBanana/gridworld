@@ -255,7 +255,7 @@ class GUI(Tk):
         
         # Reset the agent
         self.agent.reset()
-        self.gw.agentindex = self.gw.agentstart
+        self.gw.initworld()
         
         # Stop the agent from running
         self.pause()
