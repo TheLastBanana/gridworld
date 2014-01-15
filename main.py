@@ -107,18 +107,25 @@ class GUI(Tk):
         self.canvas.bind("<B1-Motion>", self._canv_lmove)
         self.canvas.bind("<ButtonRelease-1>", self._canv_lrelease)
         self.canvas.bind("<Button-3>", self._canv_rclick)
-        self.canvas.grid(row=0, columnspan=2)
+        self.canvas.grid(row=0, columnspan=3)
+        
+        self.rand_start = BooleanVar()
+        cbtn = Checkbutton(self)
+        cbtn["text"] = "Random start"
+        cbtn["variable"] = self.rand_start
+        cbtn["command"] = self.cmd_togglerand
+        cbtn.grid(row=1, column=0, rowspan=2)
         
         self.run_btn = Button(self)
         self.run_btn["command"] = self.cmd_runpause
         self.run_btn["width"] = 7
-        self.run_btn.grid(row=1)
+        self.run_btn.grid(row=1, column=1)
         
         self.reset_btn = Button(self)
         self.reset_btn["text"] = "Reset"
         self.reset_btn["command"] = self.cmd_reset
         self.reset_btn["width"] = 7
-        self.reset_btn.grid(row=2)
+        self.reset_btn.grid(row=2, column=1)
         
         self.rate_scl = Scale(self)
         self.rate_scl["from"] = 0
@@ -128,10 +135,10 @@ class GUI(Tk):
         self.rate_scl["length"] = 200
         self.rate_scl["showvalue"] = 0
         self.rate_scl["command"] = self.update_rate
-        self.rate_scl.grid(row=2, column=1)
+        self.rate_scl.grid(row=2, column=2)
         
         self.rate_text = Label(self)
-        self.rate_text.grid(row=1, column=1)
+        self.rate_text.grid(row=1, column=2)
         
         self.update_rate()
         
@@ -143,7 +150,9 @@ class GUI(Tk):
         """
         Resize the grid and add new tiles
         """
-        if resize_gw: self.gw.resize(w, h)
+        if resize_gw:
+            self.gw.resize(w, h)
+            self.rand_start.set(self.gw.agentstart == -1)
         
         newW = self.gw.w * self.tileW
         newH = self.gw.h * self.tileH
@@ -225,6 +234,14 @@ class GUI(Tk):
     def update_rate(self, event=None):
         self.agentrate = int(10 ** self.rate_scl.get())
         self.rate_text["text"] = "Rate: {:d} ms/step".format(self.agentrate)
+        
+    def cmd_togglerand(self, event=None):
+        if self.rand_start.get():
+            self.gw.agentstart = -1
+        else:
+            self.gw.agentstart = self.gw.agentindex
+            
+        self.redraw()
     
     def cmd_runpause(self, event=None):
         # If there's an alarm running, pause
@@ -280,6 +297,7 @@ class GUI(Tk):
         if not f: return
         
         self.gw.load(f)
+        self.rand_start.set(self.gw.agentstart == -1)
         self.resize(self.gw.w, self.gw.h, False)
             
         self.redraw()
@@ -359,7 +377,8 @@ class GUI(Tk):
             # Don't drag into wall
             if self.gw.tiles[ind] != gridworld.TILE_WALL:
                 self.gw.agentindex = ind
-                if not self.running: self.gw.agentstart = ind
+                if not self.running and not self.rand_start.get():
+                    self.gw.agentstart = ind
         
         # Draw walls
         else:

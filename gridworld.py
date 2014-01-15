@@ -1,4 +1,4 @@
-import pickle
+import pickle, random
 from collections import namedtuple
 
 DEFAULT_W = 16
@@ -6,6 +6,8 @@ DEFAULT_H = 16
 
 TILE_WALL = -1
 TILE_GOAL = 16
+
+AGENTSTART_RAND = -1
 
 SavedWorld = namedtuple("SavedWorld", ["agentstart", "w", "h", "tiles"])
 
@@ -34,7 +36,10 @@ class GridWorld():
         """
         Restart the world.
         """
-        self.agentindex = self.agentstart
+        if self.agentstart == AGENTSTART_RAND:
+            self.agentindex = random.choice(self.validtiles())
+        else:
+            self.agentindex = self.agentstart
     
     def get_state(self):
         """
@@ -128,6 +133,19 @@ class GridWorld():
                           2 * int(self.tileblocked(x - 1, y)) + \
                           4 * int(self.tileblocked(x + 1, y)) + \
                           8 * int(self.tileblocked(x, y + 1))
+                          
+    def validtiles(self):
+        """
+        Returns a list of all tiles indiceswhich are not occupied by a
+        wall or goal.
+        """
+        valid = []
+        
+        for i, t in enumerate(self.tiles):
+            if t != TILE_GOAL and t != TILE_WALL:
+                valid.append(i)
+                
+        return valid
 
     def save(self, filename):
         """
@@ -155,3 +173,6 @@ class GridWorld():
             self.w = world.w
             self.h = world.h
             self.tiles = world.tiles[:]
+            if self.agentstart != AGENTSTART_RAND:
+                self.agentstart = 0
+            self.initworld()
