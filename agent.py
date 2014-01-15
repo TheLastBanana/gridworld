@@ -2,6 +2,8 @@ import random
 
 TILE_GOAL = 16
 
+STATE_COUNT = 16
+
 class Agent():
     def __init__(self):
         """
