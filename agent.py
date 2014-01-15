@@ -7,11 +7,18 @@ class Agent():
         """
         Initialize the learning agent.
         """
+        init_run()
         init_episode()
+        
+    def init_run(self):
+        """
+        Resets all data and starts a new run. Override this to reset data!
+        """
+        self.run = 0
     
     def init_episode(self):
         """
-        Initializes an episode. Override this to also clear any data!
+        Initializes an episode.
         """
         self.step = 0
 
