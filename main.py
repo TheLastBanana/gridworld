@@ -124,6 +124,14 @@ class GUI(Tk):
         cbtn["command"] = self.redraw
         cbtn.grid(row=2, column=0)
         
+        self.show_weights = BooleanVar()
+        self.show_weights.set(True)
+        cbtn = Checkbutton(self)
+        cbtn["text"] = "Show weights"
+        cbtn["variable"] = self.show_weights
+        cbtn["command"] = self.redraw
+        cbtn.grid(row=3, column=0)
+        
         self.run_btn = Button(self)
         self.run_btn["command"] = self.cmd_runpause
         self.run_btn["width"] = 7
@@ -224,20 +232,22 @@ class GUI(Tk):
                 midX = x + self.tileW * 0.5
                 midY = y + self.tileH * 0.5
                 
-                S = self.gw.tiles[t]
-                maxlen = max(self.agent.Q[S])
-                                            
-                # Draw action weights
-                for A in range(agent.ACTION_COUNT):
-                    ang = A * math.pi * 0.5
-                    l = self.agent.Q[S][A] / maxlen * self.tileW * 0.5
-                    lX = l * math.cos(ang)
-                    lY = -l * math.sin(ang)
-                    
-                    self.canvas.create_line(midX,
-                                            midY,
-                                            midX + lX,
-                                            midY + lY)
+                if self.show_weights.get():
+                    S = self.gw.tiles[t]
+                    maxlen = max(self.agent.Q[S])
+                    if maxlen > 0:
+                        # Draw action weights
+                        for A in range(agent.ACTION_COUNT):
+                            ang = A * math.pi * 0.5
+                            l = self.agent.Q[S][A] / maxlen
+                            l *= min(self.tileW, self.tileH) * 0.5
+                            lX = l * math.cos(ang)
+                            lY = -l * math.sin(ang)
+                            
+                            self.canvas.create_line(midX,
+                                                    midY,
+                                                    midX + lX,
+                                                    midY + lY)
                 
                 # Draw number
                 if self.show_nums.get():
