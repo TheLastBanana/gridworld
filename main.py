@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import simpledialog
 from tkinter import filedialog
 import pickle
+import agent
 
 from collections import namedtuple
 
@@ -112,7 +113,7 @@ class GridWorld(Tk):
     
     def sample(self, action):
         """
-        Takes an action and returns a state.
+        Takes an action and returns (reward, state)
         Possible actions are:
             0 = go right
             1 = go up
@@ -129,7 +130,8 @@ class GridWorld(Tk):
             
             self.agentindex = newindex
         
-        return self.get_state()
+        newstate = self.get_state()
+        return newstate, 1 if newstate == TILE_GOAL else 0
         
     def resize(self, w, h):
         """
