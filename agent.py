@@ -49,3 +49,9 @@ class Agent():
             3 = go down
         """
         self.step += 1
+        
+    def init_options(self, master):
+        """
+        Override this to add options to the agent options panel.
+        """
+        pass

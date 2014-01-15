@@ -156,6 +156,13 @@ class GUI(Tk):
         self.rate_text = Label(self)
         self.rate_text.grid(row=1, column=2)
         
+        self.agent_opts = LabelFrame(self)
+        self.agent_opts["text"] = "Agent options"
+        self.agent_opts["padx"] = 10
+        self.agent_opts["pady"] = 10
+        self.agent_opts.grid(row=0, column=4, rowspan=3)
+        self.agent.init_options(self.agent_opts)
+        
         self.update_rate()
         
         self.update_buttons()
