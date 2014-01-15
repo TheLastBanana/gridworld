@@ -13,7 +13,7 @@ DEFAULT_TILEH = 32
 TILE_WALL = -1
 TILE_GOAL = 16
 
-SavedWorld = namedtuple("SavedWorld", ["actor", "w", "h", "tiles"])
+SavedWorld = namedtuple("SavedWorld", ["agentindex", "w", "h", "tiles"])
 
 class ResizeDlg(simpledialog.Dialog):
     def __init__(self, master, w, h):
@@ -58,11 +58,11 @@ class GridWorld(Tk):
         # Store whether mouse is currently creating or destroying walls
         self.makewall = True
         
-        # Store whether the actor is being dragged
-        self.dragactor = False
+        # Store whether the agent is being dragged
+        self.dragagent = False
         
-        # The actor's tile index
-        self.actor = 0
+        # The agent's tile index
+        self.agentindex = 0
         
         # Set up window
         self.title("GridWorld")
@@ -103,6 +103,33 @@ class GridWorld(Tk):
         test.pack()
         
         self.resize(w, h)
+    
+    def get_state(self):
+        """
+        Gets the current state.
+        """
+        return self.tiles[agentindex]
+    
+    def sample(self, action):
+        """
+        Takes an action and returns a state.
+        Possible actions are:
+            0 = go right
+            1 = go up
+            2 = go left
+            3 = go down
+        """
+        x, y = _indextopos(self.agentindex)
+        x += int(action == 0) - (action == 2)
+        y += int(action == 3) - (action == 1)
+        newindex = _postoindex(x, y)
+        
+        if not(x < 0 or y < 0 or x > self.w - 1 or y > self.h - 1
+            or self.tiles[newindex] == TILE_WALL):
+            
+            self.agentindex = newindex
+        
+        return self.get_state()
         
     def resize(self, w, h):
         """
@@ -110,6 +137,7 @@ class GridWorld(Tk):
         """
         self.w = w
         self.h = h
+        self.agentindex = 0
         
         newW = self.w * self.tileW
         newH = self.h * self.tileH
@@ -169,8 +197,8 @@ class GridWorld(Tk):
                                              fill="green",
                                              outline="green")
             
-            # Draw actor
-            if self.actor == t:
+            # Draw agent
+            if self.agentindex == t:
                 self.canvas.create_oval(x + 3,
                                         y + 3,
                                         x + self.tileW - 2,
@@ -203,7 +231,7 @@ class GridWorld(Tk):
         f = filedialog.asksaveasfile(mode="wb+", **opts)
         if not f: return
         
-        world = SavedWorld(self.actor, self.w, self.h, self.tiles)
+        world = SavedWorld(self.agentindex, self.w, self.h, self.tiles)
         pickle.dump(world, f)
         f.close()
         
@@ -225,7 +253,7 @@ class GridWorld(Tk):
         self.tiles = world.tiles[:]
         for t in range(self.w * self.h):
             self._updt_tile(t)
-        self.actor = world.actor
+        self.agentindex = world.agentindex
             
         self.redraw()
         
@@ -288,9 +316,9 @@ class GridWorld(Tk):
         pos = self._screentotiles(event.x, event.y)
         ind = self._postoindex(*pos)
         
-        # Start dragging actor
-        if self.actor == ind:
-            self.dragactor = True
+        # Start dragging agent
+        if self.agentindex == ind:
+            self.dragagent = True
         
         # Start making walls
         self.makewall = self.tiles[ind] != TILE_WALL
@@ -307,16 +335,16 @@ class GridWorld(Tk):
         
         ind = self._postoindex(x, y)
         
-        # Drag actor
-        if self.dragactor:
+        # Drag agent
+        if self.dragagent:
             # Don't drag into wall
             if self.tiles[ind] != TILE_WALL:
-                self.actor = ind
+                self.agentindex = ind
         
         # Draw walls
         else:
             # Can't draw over goal
-            if self.tiles[ind] == TILE_GOAL or self.actor == ind:
+            if self.tiles[ind] == TILE_GOAL or self.agentindex == ind:
                 return
             
             # Make position a wall/empty
@@ -333,7 +361,7 @@ class GridWorld(Tk):
         """
         Called when left-click is released on the canvas.
         """
-        self.dragactor = False
+        self.dragagent = False
         
     def _canv_rclick(self, event=None):
         """
