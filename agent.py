@@ -1,4 +1,5 @@
 import random
+from pylab import *
 
 TILE_GOAL = 16
 
@@ -19,6 +20,7 @@ class Agent():
         self.run = 0
         self.episode = 0
         self.step = 0
+        self.Q = zeros((STATE_COUNT, ACTION_COUNT), dtype=float)
         
     def init_run(self):
         """
