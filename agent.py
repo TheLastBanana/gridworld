@@ -7,20 +7,30 @@ class Agent():
         """
         Initialize the learning agent.
         """
-        self.init_run()
-        self.init_episode()
+        self.reset()
+        
+    def reset(self):
+        """
+        Resets all agent data.
+        """
+        self.run = 0
+        self.episode = 0
+        self.step = 0
         
     def init_run(self):
         """
-        Resets all data and starts a new run. Override this to reset data!
+        Resets all run data and starts a new run.
+        Override this to reset data!
         """
-        self.run = 0
+        self.run += 1
+        self.episode = 0
     
     def init_episode(self):
         """
         Initializes an episode.
         """
         self.step = 0
+        self.episode += 1
 
     def do_step(self, S, act):
         """
@@ -34,3 +44,4 @@ class Agent():
             3 = go down
         """
         act(random.randint(0, 3))
+        self.step += 1
