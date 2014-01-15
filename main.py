@@ -178,16 +178,6 @@ class GUI(Tk):
         self.canvas.delete("all")
         cW = self.gw.w * self.tileW
         cH = self.gw.h * self.tileH
-        
-        # Horizontal lines
-        for x in range(self.gw.w):
-            tileX = x * self.tileW
-            self.canvas.create_line(tileX, 0, tileX, cH, fill="grey50")
-        
-        # Vertical lines
-        for y in range(self.gw.h):
-            tileY = y * self.tileH
-            self.canvas.create_line(0, tileY, cW, tileY, fill="grey50")
             
         # Tiles
         for t in range(self.gw.w * self.gw.h):
@@ -234,6 +224,16 @@ class GUI(Tk):
                 self.canvas.create_text(x + self.tileW * 0.5,
                                         y + self.tileH * 0.5,
                                         text = "{}".format(self.gw.tiles[t]))
+        
+        # Horizontal lines
+        for x in range(self.gw.w):
+            tileX = x * self.tileW
+            self.canvas.create_line(tileX, 0, tileX, cH, fill="grey50")
+        
+        # Vertical lines
+        for y in range(self.gw.h):
+            tileY = y * self.tileH
+            self.canvas.create_line(0, tileY, cW, tileY, fill="grey50")
     
     def update_buttons(self):
         self.run_btn["text"] = "Pause" if self.agentalarm else "Run"
