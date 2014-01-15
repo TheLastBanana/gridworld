@@ -114,7 +114,15 @@ class GUI(Tk):
         cbtn["text"] = "Random start"
         cbtn["variable"] = self.rand_start
         cbtn["command"] = self.cmd_togglerand
-        cbtn.grid(row=1, column=0, rowspan=2)
+        cbtn.grid(row=1, column=0)
+        
+        self.show_nums = BooleanVar()
+        self.show_nums.set(True)
+        cbtn = Checkbutton(self)
+        cbtn["text"] = "Show numbers"
+        cbtn["variable"] = self.show_nums
+        cbtn["command"] = self.redraw
+        cbtn.grid(row=2, column=0)
         
         self.run_btn = Button(self)
         self.run_btn["command"] = self.cmd_runpause
@@ -163,7 +171,7 @@ class GUI(Tk):
         
         self.redraw()
         
-    def redraw(self):
+    def redraw(self, event=None):
         """
         Redraw the canvas.
         """
@@ -222,7 +230,7 @@ class GUI(Tk):
                                         fill="red")
             
             # Draw tile number
-            if not filled:
+            if not filled and self.show_nums.get():
                 self.canvas.create_text(x + self.tileW * 0.5,
                                         y + self.tileH * 0.5,
                                         text = "{}".format(self.gw.tiles[t]))
