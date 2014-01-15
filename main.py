@@ -122,11 +122,13 @@ class GridWorld(Tk):
         
         self.run_btn = Button(self)
         self.run_btn["command"] = self.cmd_runpause
+        self.run_btn["width"] = 7
         self.run_btn.grid(row=1)
         
         self.reset_btn = Button(self)
         self.reset_btn["text"] = "Reset"
         self.reset_btn["command"] = self.cmd_reset
+        self.reset_btn["width"] = 7
         self.reset_btn.grid(row=2)
         
         self.rate_scl = Scale(self)
