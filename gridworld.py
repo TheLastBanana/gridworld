@@ -75,6 +75,15 @@ class GridWorld():
         """
         return x + y * self.w
         
+    def validpos(self, x, y):
+        """
+        Returns whether this is a valid position in the grid world.
+        """
+        if x < 0 or x > self.w - 1 or y < 0 or y > self.h - 1:
+            return False
+            
+        return True
+        
     def indextopos(self, index):
         """
         Converts a tile index to a position.
