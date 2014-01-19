@@ -39,6 +39,7 @@ class Agent():
         """
         Initializes an episode.
         """
+        self.returnSum += G
         self.G = 0
         self.step = 0
         self.episode += 1
