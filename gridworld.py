@@ -67,7 +67,7 @@ class GridWorld():
         
         newstate = self.get_state()
         
-        return newstate, 1 if newstate == TILE_GOAL else 0
+        return 1 if newstate == TILE_GOAL else 0, newstate
         
     def postoindex(self, x, y):
         """
