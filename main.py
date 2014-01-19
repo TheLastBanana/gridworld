@@ -117,7 +117,7 @@ class GUI(Tk):
         cbtn.grid(row=1, column=0)
         
         self.show_nums = BooleanVar()
-        self.show_nums.set(True)
+        self.show_nums.set(False)
         cbtn = Checkbutton(self)
         cbtn["text"] = "Show numbers"
         cbtn["variable"] = self.show_nums
@@ -247,6 +247,8 @@ class GUI(Tk):
                         for A in range(agent.ACTION_COUNT):
                             ang = A * math.pi * 0.5
                             l = self.agent.Q[S][A] / maxlen
+                            arrow = NONE if l < 1 else LAST
+                            
                             l *= min(self.tileW, self.tileH) * 0.5
                             lX = l * math.cos(ang)
                             lY = -l * math.sin(ang)
@@ -254,7 +256,9 @@ class GUI(Tk):
                             self.canvas.create_line(midX,
                                                     midY,
                                                     midX + lX,
-                                                    midY + lY)
+                                                    midY + lY,
+                                                    arrow=arrow,
+                                                    arrowshape=(6,8,3))
                 
                 # Draw number
                 if self.show_nums.get():
