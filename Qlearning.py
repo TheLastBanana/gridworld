@@ -22,6 +22,9 @@ class Qlearning(Agent):
         # Observe reward and new state
         R, Sp = act(A)
         
+        # Update return
+        self.G += R
+        
         # max_a(Q(S', a))
         nextmax = 0 if Sp == TILE_GOAL else max(self.Q[Sp])
         
