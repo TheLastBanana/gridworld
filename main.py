@@ -351,7 +351,7 @@ class GUI(Tk):
         
         if self.cur_index >= 0:
             tile = self.gw.tiles[self.cur_index]
-            if tile >= 0 and tile < agent.ACTION_COUNT:
+            if tile >= 0 and tile < agent.STATE_COUNT:
                 right, up, left, down = self.agent.Q[tile]
         
         fmt = "{:.3f}"
