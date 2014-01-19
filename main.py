@@ -69,6 +69,9 @@ class GUI(Tk):
         # Whether the agent will be starting a new episode next step.
         self.new_episode = False
         
+        # The currently-hovered tile
+        self.cur_index = -1
+        
         # The grid world
         self.gw = gridworld.GridWorld()
         
@@ -107,14 +110,66 @@ class GUI(Tk):
         self.canvas.bind("<B1-Motion>", self._canv_lmove)
         self.canvas.bind("<ButtonRelease-1>", self._canv_lrelease)
         self.canvas.bind("<Button-3>", self._canv_rclick)
-        self.canvas.grid(row=0, columnspan=3)
+        self.canvas.bind("<Motion>", self._canv_move)
+        self.canvas.grid(row=0, column=1, columnspan=3)
         
+        # Set up info panel
+        self.info_panel = LabelFrame(self)
+        self.info_panel["text"] = "Information"
+        self.info_panel["padx"] = 10
+        self.info_panel["pady"] = 10
+        self.info_panel.grid(row=0, column=0, rowspan=3)
+        
+        # Set up action weight display
+        # Right
+        label = Label(self.info_panel)
+        label["text"] = "Right:"
+        label.grid(row=0, column=0)
+        
+        self.q_right = StringVar()
+        label = Label(self.info_panel)
+        label["textvariable"] = self.q_right
+        label.grid(row=0, column=1)
+        
+        # Up
+        label = Label(self.info_panel)
+        label["text"] = "Up:"
+        label.grid(row=1, column=0)
+        
+        self.q_up = StringVar()
+        label = Label(self.info_panel)
+        label["textvariable"] = self.q_up
+        label.grid(row=1, column=1)
+        
+        # Left
+        label = Label(self.info_panel)
+        label["text"] = "Left:"
+        label.grid(row=2, column=0)
+        
+        self.q_left = StringVar()
+        label = Label(self.info_panel)
+        label["textvariable"] = self.q_left
+        label.grid(row=2, column=1)
+        
+        # Down
+        label = Label(self.info_panel)
+        label["text"] = "Down:"
+        label.grid(row=3, column=0)
+        
+        self.q_down = StringVar()
+        label = Label(self.info_panel)
+        label["textvariable"] = self.q_down
+        label.grid(row=3, column=1)
+        
+        self.update_tileinfo()
+        
+        # Set up checkboxes
         self.rand_start = BooleanVar()
         cbtn = Checkbutton(self)
         cbtn["text"] = "Random start"
         cbtn["variable"] = self.rand_start
         cbtn["command"] = self.cmd_togglerand
-        cbtn.grid(row=1, column=0)
+        cbtn.grid(row=1, column=1)
         
         self.show_nums = BooleanVar()
         self.show_nums.set(False)
@@ -122,7 +177,7 @@ class GUI(Tk):
         cbtn["text"] = "Show numbers"
         cbtn["variable"] = self.show_nums
         cbtn["command"] = self.redraw
-        cbtn.grid(row=2, column=0)
+        cbtn.grid(row=2, column=1)
         
         self.show_weights = BooleanVar()
         self.show_weights.set(True)
@@ -130,19 +185,23 @@ class GUI(Tk):
         cbtn["text"] = "Show weights"
         cbtn["variable"] = self.show_weights
         cbtn["command"] = self.redraw
-        cbtn.grid(row=3, column=0)
+        cbtn.grid(row=3, column=1)
         
+        # Set up buttons
         self.run_btn = Button(self)
         self.run_btn["command"] = self.cmd_runpause
         self.run_btn["width"] = 7
-        self.run_btn.grid(row=1, column=1)
+        self.run_btn.grid(row=1, column=2)
         
         self.reset_btn = Button(self)
         self.reset_btn["text"] = "Reset"
         self.reset_btn["command"] = self.cmd_reset
         self.reset_btn["width"] = 7
-        self.reset_btn.grid(row=2, column=1)
+        self.reset_btn.grid(row=2, column=2)
         
+        self.update_buttons()
+        
+        # Set up rate scale
         self.rate_scl = Scale(self)
         self.rate_scl["from"] = 0
         self.rate_scl["to"] = 3
@@ -151,21 +210,19 @@ class GUI(Tk):
         self.rate_scl["length"] = 200
         self.rate_scl["showvalue"] = 0
         self.rate_scl["command"] = self.update_rate
-        self.rate_scl.grid(row=2, column=2)
+        self.rate_scl.grid(row=2, column=3)
         
         self.rate_text = Label(self)
-        self.rate_text.grid(row=1, column=2)
+        self.rate_text.grid(row=1, column=3)
+        self.update_rate()
         
+        # Set up agent options
         self.agent_opts = LabelFrame(self)
         self.agent_opts["text"] = "Agent options"
         self.agent_opts["padx"] = 10
         self.agent_opts["pady"] = 10
-        self.agent_opts.grid(row=0, column=4, rowspan=3)
+        self.agent_opts.grid(row=0, column=5, rowspan=3)
         self.agent.init_options(self.agent_opts)
-        
-        self.update_rate()
-        
-        self.update_buttons()
         
         self.resize(w, h)
         
@@ -241,12 +298,14 @@ class GUI(Tk):
                 
                 if self.show_weights.get():
                     S = self.gw.tiles[t]
-                    maxlen = max(self.agent.Q[S])
+                    minQ = min(self.agent.Q[S])
+                    
+                    maxlen = minQ + max(self.agent.Q[S])
                     if maxlen > 0:
                         # Draw action weights
                         for A in range(agent.ACTION_COUNT):
                             ang = A * math.pi * 0.5
-                            l = self.agent.Q[S][A] / maxlen
+                            l = (minQ + self.agent.Q[S][A]) / maxlen
                             arrow = NONE if l < 1 else LAST
                             
                             l *= min(self.tileW, self.tileH) * 0.5
@@ -283,6 +342,23 @@ class GUI(Tk):
     def update_rate(self, event=None):
         self.agentrate = int(10 ** self.rate_scl.get())
         self.rate_text["text"] = "Rate: {:d} ms/step".format(self.agentrate)
+        
+    def update_tileinfo(self):
+        right = 0.0
+        up = 0.0
+        left = 0.0
+        down = 0.0
+        
+        if self.cur_index >= 0:
+            tile = self.gw.tiles[self.cur_index]
+            if tile >= 0 and tile < agent.ACTION_COUNT:
+                right, up, left, down = self.agent.Q[tile]
+        
+        fmt = "{:.3f}"
+        self.q_right.set(fmt.format(right))
+        self.q_up.set(fmt.format(up))
+        self.q_left.set(fmt.format(left))
+        self.q_down.set(fmt.format(down))
         
     def cmd_togglerand(self, event=None):
         if self.rand_start.get():
@@ -363,6 +439,8 @@ class GUI(Tk):
         
         self.agent.do_step(self.gw.get_state(), self.gw.sample)
         self.redraw()
+        
+        self.update_tileinfo()
         
         self.agentalarm = self.after(self.agentrate, self.step_agent)
         
@@ -470,6 +548,17 @@ class GUI(Tk):
         
         # Redraw
         self.redraw()
+        
+    def _canv_move(self, event=None):
+        """
+        Called when the mouse moves on the canvas.
+        """
+        self.cur_index = -1
+        
+        if event:
+            x, y = self._screentotiles(event.x, event.y)
+            if self.gw.validpos(x, y):
+                self.cur_index = self.gw.postoindex(x, y)
             
     def _close(self, event=None):
         self.destroy()
