@@ -114,67 +114,105 @@ class GUI(Tk):
         self.canvas.grid(row=0, column=1, columnspan=3)
         
         # Set up tile info panel
-        self.info_panel = LabelFrame(self)
-        self.info_panel["text"] = "Tile info"
-        self.info_panel["padx"] = 10
-        self.info_panel["pady"] = 10
+        self.info_panel = Frame(self)
+        self.info_panel["padx"] = 8
+        self.info_panel["pady"] = 8
         self.info_panel.grid(row=0, column=0, rowspan=3)
         
-        label = Label(self.info_panel)
+        # Set up tile info panel
+        frame = LabelFrame(self.info_panel)
+        frame["text"] = "Tile info"
+        frame["padx"] = 5
+        frame["pady"] = 5
+        frame.grid(row=0, column=0)
+        
+        label = Label(frame)
         label["text"] = "Type:"
         label.grid(row=0, column=0)
         
         self.tile_type = StringVar()
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["textvariable"] = self.tile_type
         label["width"] = 8
         label.grid(row=0, column=1)
         
         # Right
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["text"] = "Right:"
         label.grid(row=1, column=0)
         
         self.q_right = StringVar()
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["textvariable"] = self.q_right
         label["width"] = 8
         label.grid(row=1, column=1)
         
         # Up
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["text"] = "Up:"
         label.grid(row=2, column=0)
         
         self.q_up = StringVar()
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["textvariable"] = self.q_up
         label["width"] = 8
         label.grid(row=2, column=1)
         
         # Left
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["text"] = "Left:"
         label.grid(row=3, column=0)
         
         self.q_left = StringVar()
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["textvariable"] = self.q_left
         label["width"] = 8
         label.grid(row=3, column=1)
         
         # Down
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["text"] = "Down:"
         label.grid(row=4, column=0)
         
         self.q_down = StringVar()
-        label = Label(self.info_panel)
+        label = Label(frame)
         label["textvariable"] = self.q_down
         label["width"] = 8
         label.grid(row=4, column=1)
         
         self.update_tileinfo()
+        
+        # Set up agent info
+        frame = LabelFrame(self.info_panel)
+        frame["text"] = "Agent info"
+        frame["padx"] = 5
+        frame["pady"] = 5
+        frame.grid(row=1, column=0)
+        
+        # Step
+        label = Label(frame)
+        label["text"] = "Step:"
+        label.grid(row=0, column=0)
+        
+        self.step = StringVar()
+        label = Label(frame)
+        label["textvariable"] = self.step
+        label["width"] = 4
+        label.grid(row=0, column=1)
+        
+        # Episode
+        label = Label(frame)
+        label["text"] = "Episode:"
+        label.grid(row=1, column=0)
+        
+        self.episode = StringVar()
+        label = Label(frame)
+        label["textvariable"] = self.episode
+        label["width"] = 4
+        label.grid(row=1, column=1)
+        
+        self.update_agentinfo()
+        
         
         # Set up checkboxes
         self.rand_start = BooleanVar()
@@ -385,6 +423,10 @@ class GUI(Tk):
         self.q_left.set(fmt.format(left))
         self.q_down.set(fmt.format(down))
         
+    def update_agentinfo(self):
+        self.step.set(self.agent.step)
+        self.episode.set(self.agent.episode)
+        
     def cmd_togglerand(self, event=None):
         if self.rand_start.get():
             self.gw.agentstart = -1
@@ -413,6 +455,7 @@ class GUI(Tk):
         
         self.redraw()
         self.update_buttons()
+        self.update_agentinfo()
     
     def cmd_resize(self, event=None):
         resize = ResizeDlg(self, self.gw.w, self.gw.h)
@@ -466,6 +509,7 @@ class GUI(Tk):
         self.redraw()
         
         self.update_tileinfo()
+        self.update_agentinfo()
         
         self.agentalarm = self.after(self.agentrate, self.step_agent)
         
