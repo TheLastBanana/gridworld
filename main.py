@@ -300,12 +300,12 @@ class GUI(Tk):
                     S = self.gw.tiles[t]
                     minQ = min(self.agent.Q[S])
                     
-                    maxlen = minQ + max(self.agent.Q[S])
+                    maxlen = -minQ + max(self.agent.Q[S])
                     if maxlen > 0:
                         # Draw action weights
                         for A in range(agent.ACTION_COUNT):
                             ang = A * math.pi * 0.5
-                            l = (minQ + self.agent.Q[S][A]) / maxlen
+                            l = (-minQ + self.agent.Q[S][A]) / maxlen
                             arrow = NONE if l < 1 else LAST
                             
                             l *= min(self.tileW, self.tileH) * 0.5
