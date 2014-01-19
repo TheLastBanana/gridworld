@@ -400,7 +400,7 @@ class GUI(Tk):
     def cmd_save(self, event=None):
         opts = {}
         opts["defaultextension"] = ".gwd"
-        opts["filetypes"] = [("GUIs", ".gwd")]
+        opts["filetypes"] = [("GridWorlds", ".gwd")]
         opts["parent"] = self
         opts["initialdir"] = "./worlds"
         opts["title"] = "Save world"
@@ -413,7 +413,7 @@ class GUI(Tk):
     def cmd_open(self, event=None):
         opts = {}
         opts["defaultextension"] = ".gwd"
-        opts["filetypes"] = [("GUIs", ".gwd")]
+        opts["filetypes"] = [("GridWorlds", ".gwd")]
         opts["parent"] = self
         opts["initialdir"] = "./worlds"
         opts["title"] = "Load world"
