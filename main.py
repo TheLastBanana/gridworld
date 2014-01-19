@@ -245,6 +245,8 @@ class GUI(Tk):
         self.canvas["width"] = newW
         self.canvas["height"] = newH
         
+        self.cur_index = -1
+        
         self.redraw()
         
     def redraw(self, event=None):
