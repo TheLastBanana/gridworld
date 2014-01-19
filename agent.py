@@ -22,19 +22,24 @@ class Agent():
         self.episode = 0
         self.step = 0
         self.Q = zeros((STATE_COUNT, ACTION_COUNT), dtype=float)
+        self.returnSum = 0
+        self.G = 0
         
     def init_run(self):
         """
         Resets all run data and starts a new run.
         Override this to reset data!
         """
+        self.returnSum = 0
         self.run += 1
-        self.episode = 0
+        self.episode = -1
+        self.init_episode()
     
     def init_episode(self):
         """
         Initializes an episode.
         """
+        self.G = 0
         self.step = 0
         self.episode += 1
 
