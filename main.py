@@ -113,57 +113,66 @@ class GUI(Tk):
         self.canvas.bind("<Motion>", self._canv_move)
         self.canvas.grid(row=0, column=1, columnspan=3)
         
-        # Set up info panel
+        # Set up tile info panel
         self.info_panel = LabelFrame(self)
-        self.info_panel["text"] = "Information"
+        self.info_panel["text"] = "Tile info"
         self.info_panel["padx"] = 10
         self.info_panel["pady"] = 10
         self.info_panel.grid(row=0, column=0, rowspan=3)
         
-        # Set up action weight display
+        label = Label(self.info_panel)
+        label["text"] = "Type:"
+        label.grid(row=0, column=0)
+        
+        self.tile_type = StringVar()
+        label = Label(self.info_panel)
+        label["textvariable"] = self.tile_type
+        label["width"] = 8
+        label.grid(row=0, column=1)
+        
         # Right
         label = Label(self.info_panel)
         label["text"] = "Right:"
-        label.grid(row=0, column=0)
+        label.grid(row=1, column=0)
         
         self.q_right = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_right
         label["width"] = 8
-        label.grid(row=0, column=1)
+        label.grid(row=1, column=1)
         
         # Up
         label = Label(self.info_panel)
         label["text"] = "Up:"
-        label.grid(row=1, column=0)
+        label.grid(row=2, column=0)
         
         self.q_up = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_up
         label["width"] = 8
-        label.grid(row=1, column=1)
+        label.grid(row=2, column=1)
         
         # Left
         label = Label(self.info_panel)
         label["text"] = "Left:"
-        label.grid(row=2, column=0)
+        label.grid(row=3, column=0)
         
         self.q_left = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_left
         label["width"] = 8
-        label.grid(row=2, column=1)
+        label.grid(row=3, column=1)
         
         # Down
         label = Label(self.info_panel)
         label["text"] = "Down:"
-        label.grid(row=3, column=0)
+        label.grid(row=4, column=0)
         
         self.q_down = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_down
         label["width"] = 8
-        label.grid(row=3, column=1)
+        label.grid(row=4, column=1)
         
         self.update_tileinfo()
         
@@ -350,6 +359,7 @@ class GUI(Tk):
         self.rate_text["text"] = "Rate: {:d} ms/step".format(self.agentrate)
         
     def update_tileinfo(self):
+        tile_type = "None"
         right = 0.0
         up = 0.0
         left = 0.0
@@ -357,9 +367,18 @@ class GUI(Tk):
         
         if self.cur_index >= 0:
             tile = self.gw.tiles[self.cur_index]
+            
+            if tile == gridworld.TILE_GOAL:
+                tile_type = "Goal"
+            elif tile == gridworld.TILE_WALL:
+                tile_type = "Wall"
+            else:
+                tile_type = "{}".format(tile)
+            
             if tile >= 0 and tile < agent.STATE_COUNT:
                 right, up, left, down = self.agent.Q[tile]
         
+        self.tile_type.set(tile_type)
         fmt = "{:.3f}"
         self.q_right.set(fmt.format(right))
         self.q_up.set(fmt.format(up))
