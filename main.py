@@ -397,8 +397,7 @@ class GUI(Tk):
         Called when the canvas is left-clicked.
         """
         x, y = self._screentotiles(event.x, event.y)
-        if x < 0 or x > self.gw.w - 1 or y < 0 or y > self.gw.h - 1:
-            return
+        if not self.gw.validpos(x, y): return
         
         ind = self.gw.postoindex(x, y)
         
@@ -416,8 +415,7 @@ class GUI(Tk):
         Called when the canvas is left-clicked and the mouse moves.
         """
         x, y = self._screentotiles(event.x, event.y)
-        if x < 0 or x > self.gw.w - 1 or y < 0 or y > self.gw.h - 1:
-            return
+        if not self.gw.validpos(x, y): return
         
         ind = self.gw.postoindex(x, y)
         
