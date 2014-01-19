@@ -558,7 +558,8 @@ class GUI(Tk):
         if event:
             x, y = self._screentotiles(event.x, event.y)
             if self.gw.validpos(x, y):
-                self.cur_index = self.gw.postoindex(x, y)
+                self.cur_index = min(self.gw.postoindex(x, y),
+                                     len(self.gw.tiles))
             
     def _close(self, event=None):
         self.destroy()
