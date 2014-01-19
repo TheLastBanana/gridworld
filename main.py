@@ -129,6 +129,7 @@ class GUI(Tk):
         self.q_right = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_right
+        label["width"] = 8
         label.grid(row=0, column=1)
         
         # Up
@@ -139,6 +140,7 @@ class GUI(Tk):
         self.q_up = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_up
+        label["width"] = 8
         label.grid(row=1, column=1)
         
         # Left
@@ -149,6 +151,7 @@ class GUI(Tk):
         self.q_left = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_left
+        label["width"] = 8
         label.grid(row=2, column=1)
         
         # Down
@@ -159,6 +162,7 @@ class GUI(Tk):
         self.q_down = StringVar()
         label = Label(self.info_panel)
         label["textvariable"] = self.q_down
+        label["width"] = 8
         label.grid(row=3, column=1)
         
         self.update_tileinfo()
@@ -560,6 +564,8 @@ class GUI(Tk):
             if self.gw.validpos(x, y):
                 self.cur_index = min(self.gw.postoindex(x, y),
                                      len(self.gw.tiles))
+                                     
+        self.update_tileinfo()
             
     def _close(self, event=None):
         self.destroy()
