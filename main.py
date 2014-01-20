@@ -328,6 +328,7 @@ class GUI(Tk):
         self.canvas["height"] = newH
         
         self.cur_index = -1
+        self.agent.reset()
         
         self.redraw()
         
