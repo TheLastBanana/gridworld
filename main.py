@@ -525,12 +525,11 @@ class GUI(Tk):
         simulate = SimulateDlg(self)
         
         if simulate.result:
-            curep = self.agent.episode
-            endep = curep + simulate.result
-            while self.agent.episode < endep:
-                if self.step_agent() and self.agent.episode == endep - 1: break
+            count = 0
             
-            self.start_episode()
+            while count < simulate.result:
+                if self.step_agent(): count += 1
+            
             self.update_agentinfo()
             self.redraw()
             
@@ -583,15 +582,17 @@ class GUI(Tk):
         Make the agent take one step. Returns True if the agent has reached
         the goal.
         """
-        # Start a new episode
-        if self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL \
-            or self.agent.step > TIMEOUT:
-                
-            self.start_episode()
-        
         self.agent.do_step(self.gw.get_state(), self.gw.sample)
         
-        return self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL
+        # Start a new episode
+        restarted = False
+        if self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL \
+            or self.agent.step > TIMEOUT:
+            
+            self.start_episode()
+            restarted = True
+        
+        return restarted
         
     def resume(self):
         """
