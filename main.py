@@ -290,6 +290,12 @@ class GUI(Tk):
         self.reset_btn["width"] = 7
         self.reset_btn.grid(row=1, column=1)
         
+        self.step_btn = Button(frame)
+        self.step_btn["text"] = "Step"
+        self.step_btn["command"] = self.cmd_step
+        self.step_btn["width"] = 7
+        self.step_btn.grid(row=2, column=1)
+        
         self.update_buttons()
         
         # Set up rate scale
@@ -431,7 +437,6 @@ class GUI(Tk):
     
     def update_buttons(self):
         self.run_btn["text"] = "Pause" if self.agentalarm else "Run"
-        self.reset_btn["state"] = NORMAL if self.running else DISABLED
             
     def update_rate(self, event=None):
         self.agentrate = int(10 ** self.rate_scl.get())
@@ -490,8 +495,6 @@ class GUI(Tk):
             self.resume()
             
     def cmd_reset(self, event=None):
-        if not self.running: return
-        
         # Reset the agent
         self.agent.reset()
         self.gw.initworld()
@@ -502,6 +505,12 @@ class GUI(Tk):
         
         self.redraw()
         self.update_buttons()
+        self.update_agentinfo()
+        
+    def cmd_step(self, event=None):
+        self.running = True
+        self.step_agent()
+        self.redraw()
         self.update_agentinfo()
     
     def cmd_resize(self, event=None):
