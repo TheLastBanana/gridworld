@@ -91,9 +91,6 @@ class GUI(Tk):
         # Whether the simulation has been started yet
         self.running = False
         
-        # Whether the agent will be starting a new episode next step.
-        self.new_episode = False
-        
         # The currently-hovered tile
         self.cur_index = -1
         
@@ -514,9 +511,11 @@ class GUI(Tk):
         
         if simulate.result:
             curep = self.agent.episode
-            while self.agent.episode < curep + simulate.result:
-                self.step_agent()
-                
+            endep = curep + simulate.result
+            while self.agent.episode < endep:
+                if self.step_agent() and self.agent.episode == endep - 1: break
+            
+            self.start_episode()
             self.update_agentinfo()
             self.redraw()
             
@@ -550,6 +549,10 @@ class GUI(Tk):
             
         self.redraw()
         
+    def start_episode(self):
+        self.gw.initworld()
+        self.agent.init_episode()
+        
     def step_agent_gui(self, setalarm=True):
         self.step_agent()
         self.redraw()
@@ -562,17 +565,18 @@ class GUI(Tk):
         
     def step_agent(self):
         """
-        Make the agent take one step.
+        Make the agent take one step. Returns True if the agent has reached
+        the goal.
         """
         # Start a new episode
         if self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL \
             or self.agent.step > TIMEOUT:
-            
-            self.gw.initworld()
-            self.agent.init_episode()
-            self.new_episode = False
+                
+            self.start_episode()
         
         self.agent.do_step(self.gw.get_state(), self.gw.sample)
+        
+        return self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL
         
     def resume(self):
         """
