@@ -24,12 +24,14 @@ class GridWorld():
         """
         self.w = w
         self.h = h
-        self.agentindex = self.agentstart = 0
+        self.agentstart = -1
         
         # Add tiles
         self.tiles = [0] * w * h
         for t in range(w * h):
             self.updt_tile(t)
+        
+        self.initworld()
     
     def initworld(self):
         """
