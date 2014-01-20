@@ -5,8 +5,8 @@ class Qlearning(Agent):
     def reset(self):
         Agent.reset(self)
         self.Q = zeros((STATE_COUNT, ACTION_COUNT))
-        self.epsilon = 0.5
-        self.alpha = 0.01
+        self.epsilon = 0.1
+        self.alpha = 0.1
         self.gamma = 1
     
     def do_step(self, S, act):
