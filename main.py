@@ -280,22 +280,22 @@ class GUI(Tk):
         cbtn.grid(row=2, column=0)
         
         # Set up buttons
+        self.step_btn = Button(frame)
+        self.step_btn["text"] = "Step"
+        self.step_btn["command"] = self.cmd_step
+        self.step_btn["width"] = 7
+        self.step_btn.grid(row=0, column=1)
+        
         self.run_btn = Button(frame)
         self.run_btn["command"] = self.cmd_runpause
         self.run_btn["width"] = 7
-        self.run_btn.grid(row=0, column=1)
+        self.run_btn.grid(row=1, column=1)
         
         self.reset_btn = Button(frame)
         self.reset_btn["text"] = "Reset"
         self.reset_btn["command"] = self.cmd_reset
         self.reset_btn["width"] = 7
-        self.reset_btn.grid(row=1, column=1)
-        
-        self.step_btn = Button(frame)
-        self.step_btn["text"] = "Step"
-        self.step_btn["command"] = self.cmd_step
-        self.step_btn["width"] = 7
-        self.step_btn.grid(row=2, column=1)
+        self.reset_btn.grid(row=2, column=1)
         
         self.update_buttons()
         
