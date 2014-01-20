@@ -134,13 +134,13 @@ class GUI(Tk):
         self.canvas.bind("<ButtonRelease-1>", self._canv_lrelease)
         self.canvas.bind("<Button-3>", self._canv_rclick)
         self.canvas.bind("<Motion>", self._canv_move)
-        self.canvas.grid(row=0, column=1, columnspan=3)
+        self.canvas.grid(row=0, column=1)
         
         # Set up tile info panel
         self.info_panel = Frame(self)
         self.info_panel["padx"] = 8
         self.info_panel["pady"] = 8
-        self.info_panel.grid(row=0, column=0, rowspan=3)
+        self.info_panel.grid(row=0, column=0)
         
         # Set up tile info panel
         frame = LabelFrame(self.info_panel)
@@ -247,46 +247,53 @@ class GUI(Tk):
         
         self.update_agentinfo()
         
+        # Set up agent info
+        frame = LabelFrame(self)
+        frame["text"] = "Simulation options"
+        frame["padx"] = 5
+        frame["pady"] = 5
+        frame.grid(row=1, column=1)
+        
         # Set up checkboxes
         self.rand_start = BooleanVar()
-        cbtn = Checkbutton(self)
+        cbtn = Checkbutton(frame)
         cbtn["text"] = "Random start"
         cbtn["variable"] = self.rand_start
         cbtn["command"] = self.cmd_togglerand
-        cbtn.grid(row=1, column=1)
+        cbtn.grid(row=0, column=0)
         
         self.show_nums = BooleanVar()
         self.show_nums.set(False)
-        cbtn = Checkbutton(self)
+        cbtn = Checkbutton(frame)
         cbtn["text"] = "Show numbers"
         cbtn["variable"] = self.show_nums
         cbtn["command"] = self.redraw
-        cbtn.grid(row=2, column=1)
+        cbtn.grid(row=1, column=0)
         
         self.show_weights = BooleanVar()
         self.show_weights.set(True)
-        cbtn = Checkbutton(self)
+        cbtn = Checkbutton(frame)
         cbtn["text"] = "Show weights"
         cbtn["variable"] = self.show_weights
         cbtn["command"] = self.redraw
-        cbtn.grid(row=3, column=1)
+        cbtn.grid(row=2, column=0)
         
         # Set up buttons
-        self.run_btn = Button(self)
+        self.run_btn = Button(frame)
         self.run_btn["command"] = self.cmd_runpause
         self.run_btn["width"] = 7
-        self.run_btn.grid(row=1, column=2)
+        self.run_btn.grid(row=0, column=1)
         
-        self.reset_btn = Button(self)
+        self.reset_btn = Button(frame)
         self.reset_btn["text"] = "Reset"
         self.reset_btn["command"] = self.cmd_reset
         self.reset_btn["width"] = 7
-        self.reset_btn.grid(row=2, column=2)
+        self.reset_btn.grid(row=1, column=1)
         
         self.update_buttons()
         
         # Set up rate scale
-        self.rate_scl = Scale(self)
+        self.rate_scl = Scale(frame)
         self.rate_scl["from"] = 0
         self.rate_scl["to"] = 3
         self.rate_scl["resolution"] = -1
@@ -294,18 +301,17 @@ class GUI(Tk):
         self.rate_scl["length"] = 200
         self.rate_scl["showvalue"] = 0
         self.rate_scl["command"] = self.update_rate
-        self.rate_scl.grid(row=2, column=3)
+        self.rate_scl.grid(row=1, column=2)
         
-        self.rate_text = Label(self)
-        self.rate_text.grid(row=1, column=3)
+        self.rate_text = Label(frame)
+        self.rate_text.grid(row=0, column=2)
         self.update_rate()
         
         # Set up agent options
-        self.agent_opts = LabelFrame(self)
-        self.agent_opts["text"] = "Agent options"
-        self.agent_opts["padx"] = 10
-        self.agent_opts["pady"] = 10
-        self.agent_opts.grid(row=0, column=5, rowspan=3)
+        self.agent_opts = Frame(self)
+        self.agent_opts["padx"] = 8
+        self.agent_opts["pady"] = 8
+        self.agent_opts.grid(row=0, column=2)
         self.agent.init_options(self.agent_opts)
         
         self.resize(w, h)
