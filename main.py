@@ -197,7 +197,7 @@ class GUI(Tk):
         self.step = StringVar()
         label = Label(frame)
         label["textvariable"] = self.step
-        label["width"] = 4
+        label["width"] = 8
         label.grid(row=0, column=1)
         
         # Episode
@@ -208,11 +208,21 @@ class GUI(Tk):
         self.episode = StringVar()
         label = Label(frame)
         label["textvariable"] = self.episode
-        label["width"] = 4
+        label["width"] = 8
         label.grid(row=1, column=1)
         
-        self.update_agentinfo()
+        # Average return
+        label = Label(frame)
+        label["text"] = "Avg return:"
+        label.grid(row=2, column=0)
         
+        self.avg_return = StringVar()
+        label = Label(frame)
+        label["textvariable"] = self.avg_return
+        label["width"] = 8
+        label.grid(row=2, column=1)
+        
+        self.update_agentinfo()
         
         # Set up checkboxes
         self.rand_start = BooleanVar()
@@ -426,6 +436,10 @@ class GUI(Tk):
     def update_agentinfo(self):
         self.step.set(self.agent.step)
         self.episode.set(self.agent.episode)
+        
+        if self.agent.episode > 0:
+            avgret = self.agent.returnSum / self.agent.episode
+            self.avg_return.set("{:.3f}".format(avgret))
         
     def cmd_togglerand(self, event=None):
         if self.rand_start.get():
