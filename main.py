@@ -8,6 +8,8 @@ import math
 DEFAULT_TILEW = 32
 DEFAULT_TILEH = 32
 
+TIMEOUT = 5000
+
 class ResizeDlg(simpledialog.Dialog):
     def __init__(self, master, w, h):
         # String variable inputs
@@ -563,7 +565,9 @@ class GUI(Tk):
         Make the agent take one step.
         """
         # Start a new episode
-        if self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL:
+        if self.gw.tiles[self.gw.agentindex] == agent.TILE_GOAL \
+            or self.agent.step > TIMEOUT:
+            
             self.gw.initworld()
             self.agent.init_episode()
             self.new_episode = False
