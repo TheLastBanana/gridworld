@@ -42,6 +42,29 @@ class ResizeDlg(simpledialog.Dialog):
         w = int(self.w.get())
         h = int(self.h.get())
         self.result = w, h
+        
+class SimulateDlg(simpledialog.Dialog):
+    def __init__(self, master):
+        # String variable inputs
+        self.episodes = StringVar()
+        
+        # Init
+        master.title("Simulate")
+        simpledialog.Dialog.__init__(self, master)
+        
+    def body(self, master):
+        label = Label(master)
+        label["text"] = "Episodes:"
+        label.grid(row=0, column=0)
+        
+        self.epentry = Entry(master)
+        self.epentry["textvariable"] = self.episodes
+        self.epentry.grid(row=0, column=1)
+        
+        return self.epentry
+        
+    def apply(self):
+        self.result = int(self.epentry.get())
 
 class GUI(Tk):
     def __init__(self, w = gridworld.DEFAULT_W, h = gridworld.DEFAULT_H,
@@ -83,6 +106,7 @@ class GUI(Tk):
         self.bind("<Control-r>", self.cmd_resize)
         self.bind("<space>", self.cmd_runpause)
         self.bind("<r>", self.cmd_reset)
+        self.bind("<s>", self.cmd_simulate)
         
         # Set up menu bar
         self.menu = Menu(self)
@@ -95,6 +119,8 @@ class GUI(Tk):
         self.optmenu = Menu(self.menu, tearoff = 0)
         self.optmenu.add_command(label="Resize", command=self.cmd_resize)
         self.menu.add_cascade(label="Options", menu=self.optmenu)
+        
+        self.menu.add_command(label="Simulate", command=self.cmd_simulate)
         
         self.config(menu = self.menu)
         
@@ -440,6 +466,8 @@ class GUI(Tk):
         if self.agent.episode > 0:
             avgret = self.agent.returnSum / self.agent.episode
             self.avg_return.set("{:.3f}".format(avgret))
+        else:
+            self.avg_return.set("NaN")
         
     def cmd_togglerand(self, event=None):
         if self.rand_start.get():
@@ -479,6 +507,17 @@ class GUI(Tk):
             w, h = resize.result
             self.resize(w, h)
             
+    def cmd_simulate(self, event=None):
+        simulate = SimulateDlg(self)
+        
+        if simulate.result:
+            curep = self.agent.episode
+            while self.agent.episode < curep + simulate.result:
+                self.step_agent()
+                
+            self.update_agentinfo()
+            self.redraw()
+            
     def cmd_save(self, event=None):
         opts = {}
         opts["defaultextension"] = ".gwd"
@@ -509,6 +548,16 @@ class GUI(Tk):
             
         self.redraw()
         
+    def step_agent_gui(self, setalarm=True):
+        self.step_agent()
+        self.redraw()
+        
+        self.update_tileinfo()
+        self.update_agentinfo()
+        
+        if setalarm:
+            self.agentalarm = self.after(self.agentrate, self.step_agent_gui)
+        
     def step_agent(self):
         """
         Make the agent take one step.
@@ -520,19 +569,13 @@ class GUI(Tk):
             self.new_episode = False
         
         self.agent.do_step(self.gw.get_state(), self.gw.sample)
-        self.redraw()
-        
-        self.update_tileinfo()
-        self.update_agentinfo()
-        
-        self.agentalarm = self.after(self.agentrate, self.step_agent)
         
     def resume(self):
         """
         Resume the simulation.
         """
         # Set a new alarm
-        self.agentalarm = self.after(self.agentrate, self.step_agent)
+        self.agentalarm = self.after(self.agentrate, self.step_agent_gui)
         self.running = True
         
         self.update_buttons()
