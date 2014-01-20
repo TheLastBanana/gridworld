@@ -20,8 +20,7 @@ class ResizeDlg(simpledialog.Dialog):
         self.h.set(h)
         
         # Init
-        master.title("Resize")
-        simpledialog.Dialog.__init__(self, master)
+        simpledialog.Dialog.__init__(self, master, "Resize")
     
     def body(self, master):
         label = Label(master)
@@ -51,8 +50,7 @@ class SimulateDlg(simpledialog.Dialog):
         self.episodes = StringVar()
         
         # Init
-        master.title("Simulate")
-        simpledialog.Dialog.__init__(self, master)
+        simpledialog.Dialog.__init__(self, master, "Simulate")
         
     def body(self, master):
         label = Label(master)
