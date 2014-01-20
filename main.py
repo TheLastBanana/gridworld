@@ -101,7 +101,8 @@ class GUI(Tk):
         self.bind("<Control-s>", self.cmd_save)
         self.bind("<Control-o>", self.cmd_open)
         self.bind("<Control-r>", self.cmd_resize)
-        self.bind("<space>", self.cmd_runpause)
+        self.bind("<Return>", self.cmd_runpause)
+        self.bind("<space>", self.cmd_step)
         self.bind("<r>", self.cmd_reset)
         self.bind("<s>", self.cmd_simulate)
         
