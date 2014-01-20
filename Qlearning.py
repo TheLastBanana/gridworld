@@ -1,9 +1,10 @@
 from agent import *
+import random
 
 class Qlearning(Agent):
     def reset(self):
         Agent.reset(self)
-        self.Q = 0.00001 * rand(STATE_COUNT, ACTION_COUNT)
+        self.Q = zeros((STATE_COUNT, ACTION_COUNT))
         self.epsilon = 0.5
         self.alpha = 0.01
         self.gamma = 1
@@ -17,7 +18,10 @@ class Qlearning(Agent):
             A = randint(ACTION_COUNT)
         else:
             # Choose the best action for this state
-            A = argmax(self.Q[S])
+            Qs = self.Q[S]
+            maxQ = max(Qs)
+            As = where(Qs == maxQ)[0]
+            A = random.choice(As)
         
         # Observe reward and new state
         R, Sp = act(A)
