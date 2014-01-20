@@ -34,3 +34,67 @@ class Qlearning(Agent):
         
         # Update Q for this state/action pair
         self.Q[S][A] += self.alpha * (R + self.gamma * nextmax - self.Q[S][A])
+        
+    def update_alpha(self, event=None):
+        self.alpha = self.alpha_var.get()
+    
+    def update_epsilon(self, event=None):
+        self.epsilon = self.epsilon_var.get()
+    
+    def update_gamma(self, event=None):
+        self.gamma = self.gamma_var.get()
+
+    def init_options(self, master):
+        # Alpha
+        frame = LabelFrame(master)
+        frame["text"] = "Alpha"
+        frame["padx"] = 5
+        frame["pady"] = 5
+        frame.grid(row=0, column=0)
+        
+        self.alpha_var = DoubleVar()
+        self.alpha_var.set(self.alpha)
+        scale = Scale(frame)
+        scale["from"] = 1
+        scale["to"] = 0
+        scale["resolution"] = 0.05
+        scale["orient"] = VERTICAL
+        scale["variable"] = self.alpha_var
+        scale["command"] = self.update_alpha
+        scale.pack()
+        
+        # Epsilon
+        frame = LabelFrame(master)
+        frame["text"] = "Epsilon"
+        frame["padx"] = 5
+        frame["pady"] = 5
+        frame.grid(row=1, column=0)
+        
+        self.epsilon_var = DoubleVar()
+        self.epsilon_var.set(self.epsilon)
+        scale = Scale(frame)
+        scale["from"] = 1
+        scale["to"] = 0
+        scale["resolution"] = 0.05
+        scale["orient"] = VERTICAL
+        scale["variable"] = self.epsilon_var
+        scale["command"] = self.update_epsilon
+        scale.pack()
+        
+        # Gamma
+        frame = LabelFrame(master)
+        frame["text"] = "Gamma"
+        frame["padx"] = 5
+        frame["pady"] = 5
+        frame.grid(row=2, column=0)
+        
+        self.gamma_var = DoubleVar()
+        self.gamma_var.set(self.gamma)
+        scale = Scale(frame)
+        scale["from"] = 1
+        scale["to"] = 0
+        scale["resolution"] = 0.05
+        scale["orient"] = VERTICAL
+        scale["variable"] = self.gamma_var
+        scale["command"] = self.update_gamma
+        scale.pack()
