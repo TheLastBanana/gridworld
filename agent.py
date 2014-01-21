@@ -21,9 +21,21 @@ class Agent():
         self.run = 0
         self.episode = 0
         self.step = 0
-        self.Q = zeros((STATE_COUNT, ACTION_COUNT), dtype=float)
         self.returnSum = 0
         self.G = 0
+        self.init_Q()
+        
+    def init_Q(self):
+        """
+        Initialize Q values.
+        """
+        self.Q = zeros((STATE_COUNT, ACTION_COUNT), dtype=float)
+        
+    def get_Qs(self, S):
+        """
+        Returns Q values for the given OBSERVATION state.
+        """
+        return self.Q[S]
         
     def init_run(self):
         """

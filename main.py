@@ -399,14 +399,16 @@ class GUI(Tk):
                 
                 if self.show_weights.get():
                     S = self.gw.tiles[t]
-                    minQ = min(self.agent.Q[S])
+                    Qs = self.agent.get_Qs(S)
                     
-                    maxlen = -minQ + max(self.agent.Q[S])
+                    minQ = min(Qs)
+                    
+                    maxlen = -minQ + max(Qs)
                     if maxlen > 0:
                         # Draw action weights
                         for A in range(agent.ACTION_COUNT):
                             ang = A * math.pi * 0.5
-                            l = (-minQ + self.agent.Q[S][A]) / maxlen
+                            l = (-minQ + Qs[A]) / maxlen
                             arrow = NONE if l < 1 else LAST
                             
                             l *= min(self.tileW, self.tileH) * 0.5
@@ -461,7 +463,7 @@ class GUI(Tk):
                 tile_type = "{}".format(tile)
             
             if tile >= 0 and tile < agent.STATE_COUNT:
-                right, up, left, down = self.agent.Q[tile]
+                right, up, left, down = self.agent.get_Qs(tile)
         
         self.tile_type.set(tile_type)
         fmt = "{:.3f}"
