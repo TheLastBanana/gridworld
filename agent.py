@@ -37,6 +37,12 @@ class Agent():
         """
         return self.Q[S]
         
+    def get_S(self, obs):
+        """
+        Given the observation state, returns the agent state.
+        """
+        return obs
+        
     def init_run(self):
         """
         Resets all run data and starts a new run.

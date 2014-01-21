@@ -12,6 +12,9 @@ class Qlearning(Agent):
     def do_step(self, S, act):
         Agent.do_step(self, S, act)
         
+        # Observation -> agent state
+        S = self.get_S(S)
+        
         # Epsilon-greedy action selection
         if ranf() <= self.epsilon:
             # Choose a random action (0 or 1)
