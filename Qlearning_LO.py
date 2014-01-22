@@ -16,7 +16,7 @@ class Qlearning_LO(Qlearning):
         return (self.lastObs + 1) * STATE_COUNT + obs
         
     def init_episode(self):
-        Qlearning.init_episode()
+        Qlearning.init_episode(self)
         self.lastObs = -1
         
     def do_step(self, S, act):
