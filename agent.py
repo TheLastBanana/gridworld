@@ -84,3 +84,53 @@ class Agent():
         Override this to add options to the agent options panel.
         """
         pass
+        
+    def init_info(self, master):
+        """
+        Override this to add options to the agent info panel.
+        """
+        # Step
+        label = Label(master)
+        label["text"] = "Step:"
+        label.grid(row=0, column=0)
+        
+        self.step_var = StringVar()
+        label = Label(master)
+        label["textvariable"] = self.step_var
+        label["width"] = 8
+        label.grid(row=0, column=1)
+        
+        # Episode
+        label = Label(master)
+        label["text"] = "Episode:"
+        label.grid(row=1, column=0)
+        
+        self.episode_var = StringVar()
+        label = Label(master)
+        label["textvariable"] = self.episode_var
+        label["width"] = 8
+        label.grid(row=1, column=1)
+        
+        # Average return
+        label = Label(master)
+        label["text"] = "Avg return:"
+        label.grid(row=2, column=0)
+        
+        self.avg_return_var = StringVar()
+        label = Label(master)
+        label["textvariable"] = self.avg_return_var
+        label["width"] = 8
+        label.grid(row=2, column=1)
+        
+    def update_info(self):
+        """
+        Override this to update the agent info panel.
+        """
+        self.step_var.set(self.step)
+        self.episode_var.set(self.episode)
+        
+        if self.episode > 0:
+            avgret = self.returnSum / self.episode
+            self.avg_return_var.set("{:.3f}".format(avgret))
+        else:
+            self.avg_return_var.set("NaN")

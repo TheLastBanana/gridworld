@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import simpledialog
 from tkinter import filedialog
-import agent, Qlearning
+import agent, Qlearning_LA
 import gridworld
 import math
 
@@ -72,7 +72,7 @@ class GUI(Tk):
         Tk.__init__(self)
         
         # The current agent type
-        self.agent = Qlearning.Qlearning()#agent.Agent()
+        self.agent = Qlearning_LA.Qlearning_LA()
         
         # Store whether mouse is currently creating or destroying walls
         self.makewall = True
@@ -213,39 +213,7 @@ class GUI(Tk):
         frame["pady"] = 5
         frame.grid(row=1, column=0)
         
-        # Step
-        label = Label(frame)
-        label["text"] = "Step:"
-        label.grid(row=0, column=0)
-        
-        self.step = StringVar()
-        label = Label(frame)
-        label["textvariable"] = self.step
-        label["width"] = 8
-        label.grid(row=0, column=1)
-        
-        # Episode
-        label = Label(frame)
-        label["text"] = "Episode:"
-        label.grid(row=1, column=0)
-        
-        self.episode = StringVar()
-        label = Label(frame)
-        label["textvariable"] = self.episode
-        label["width"] = 8
-        label.grid(row=1, column=1)
-        
-        # Average return
-        label = Label(frame)
-        label["text"] = "Avg return:"
-        label.grid(row=2, column=0)
-        
-        self.avg_return = StringVar()
-        label = Label(frame)
-        label["textvariable"] = self.avg_return
-        label["width"] = 8
-        label.grid(row=2, column=1)
-        
+        self.agent.init_info(frame)
         self.update_agentinfo()
         
         # Set up agent info
@@ -319,6 +287,7 @@ class GUI(Tk):
         self.agent_opts["padx"] = 8
         self.agent_opts["pady"] = 8
         self.agent_opts.grid(row=0, column=2)
+        
         self.agent.init_options(self.agent_opts)
         
         self.resize(w, h)
@@ -473,14 +442,7 @@ class GUI(Tk):
         self.q_down.set(fmt.format(down))
         
     def update_agentinfo(self):
-        self.step.set(self.agent.step)
-        self.episode.set(self.agent.episode)
-        
-        if self.agent.episode > 0:
-            avgret = self.agent.returnSum / self.agent.episode
-            self.avg_return.set("{:.3f}".format(avgret))
-        else:
-            self.avg_return.set("NaN")
+        self.agent.update_info()
         
     def cmd_togglerand(self, event=None):
         if self.rand_start.get():
