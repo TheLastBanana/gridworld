@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import simpledialog
 from tkinter import filedialog
-import agent, RandomWalk, Qlearning, Qlearning_LO, Qlearning_LA
+import agent, RandomWalk, Qlearning, Qlearning_LO, Qlearning_LA, Qlearning_LAO
 import gridworld
 import math
 
@@ -127,6 +127,8 @@ class GUI(Tk):
                             command=lambda: self.cmd_setagent(Qlearning_LO.Qlearning_LO))
         submenu.add_command(label="LA Q-learning",
                             command=lambda: self.cmd_setagent(Qlearning_LA.Qlearning_LA))
+        submenu.add_command(label="LAO Q-learning",
+                            command=lambda: self.cmd_setagent(Qlearning_LAO.Qlearning_LAO))
         self.menu.add_cascade(label="Agent", menu=submenu)
         
         self.menu.add_command(label="Simulate", command=self.cmd_simulate)
