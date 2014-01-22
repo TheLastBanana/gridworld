@@ -38,6 +38,8 @@ class Qlearning(Agent):
         # Update Q for this state/action pair
         self.Q[S][A] += self.alpha * (R + self.gamma * nextmax - self.Q[S][A])
         
+        return Sp
+        
     def update_alpha(self, event=None):
         self.alpha = self.alpha_var.get()
     
