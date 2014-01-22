@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import simpledialog
 from tkinter import filedialog
-import agent, Qlearning_LA
+import agent, RandomWalk, Qlearning, Qlearning_LO
 import gridworld
 import math
 
@@ -71,8 +71,8 @@ class GUI(Tk):
                  tileW = DEFAULT_TILEW, tileH = DEFAULT_TILEH):
         Tk.__init__(self)
         
-        # The current agent type
-        self.agent = Qlearning_LA.Qlearning_LA()
+        # The current agent
+        self.agent = RandomWalk.RandomWalk()
         
         # Store whether mouse is currently creating or destroying walls
         self.makewall = True
@@ -109,14 +109,23 @@ class GUI(Tk):
         # Set up menu bar
         self.menu = Menu(self)
         
-        self.filemenu = Menu(self.menu,tearoff = 0)
-        self.filemenu.add_command(label="Save", command=self.cmd_save)
-        self.filemenu.add_command(label="Open", command=self.cmd_open)
-        self.menu.add_cascade(label="File", menu=self.filemenu)
+        submenu = Menu(self.menu, tearoff=0)
+        submenu.add_command(label="Save", command=self.cmd_save)
+        submenu.add_command(label="Open", command=self.cmd_open)
+        self.menu.add_cascade(label="File", menu=submenu)
         
-        self.optmenu = Menu(self.menu, tearoff = 0)
-        self.optmenu.add_command(label="Resize", command=self.cmd_resize)
-        self.menu.add_cascade(label="Options", menu=self.optmenu)
+        submenu = Menu(self.menu, tearoff=0)
+        submenu.add_command(label="Resize", command=self.cmd_resize)
+        self.menu.add_cascade(label="Options", menu=submenu)
+        
+        submenu = Menu(self.menu, tearoff=0)
+        submenu.add_command(label="Random Walk",
+                            command=lambda: self.cmd_setagent(RandomWalk.RandomWalk))
+        submenu.add_command(label="Q-learning",
+                            command=lambda: self.cmd_setagent(Qlearning.Qlearning))
+        submenu.add_command(label="LO Q-learning",
+                            command=lambda: self.cmd_setagent(Qlearning_LO.Qlearning_LO))
+        self.menu.add_cascade(label="Agent", menu=submenu)
         
         self.menu.add_command(label="Simulate", command=self.cmd_simulate)
         
@@ -207,16 +216,6 @@ class GUI(Tk):
         self.update_tileinfo()
         
         # Set up agent info
-        frame = LabelFrame(self.info_panel)
-        frame["text"] = "Agent info"
-        frame["padx"] = 5
-        frame["pady"] = 5
-        frame.grid(row=1, column=0)
-        
-        self.agent.init_info(frame)
-        self.update_agentinfo()
-        
-        # Set up agent info
         frame = LabelFrame(self)
         frame["text"] = "Simulation options"
         frame["padx"] = 5
@@ -282,6 +281,16 @@ class GUI(Tk):
         self.rate_text.grid(row=0, column=2)
         self.update_rate()
         
+        self.agent_opts = None
+        self.agent_info = None
+        self.init_agent_panels()
+        
+        self.resize(w, h)
+        
+    def init_agent_panels(self):
+        if self.agent_opts: self.agent_opts.destroy()
+        if self.agent_info: self.agent_info.destroy()
+        
         # Set up agent options
         self.agent_opts = Frame(self)
         self.agent_opts["padx"] = 8
@@ -290,7 +299,15 @@ class GUI(Tk):
         
         self.agent.init_options(self.agent_opts)
         
-        self.resize(w, h)
+        # Set up agent info
+        self.agent_info = LabelFrame(self.info_panel)
+        self.agent_info["text"] = "Agent info"
+        self.agent_info["padx"] = 5
+        self.agent_info["pady"] = 5
+        self.agent_info.grid(row=1, column=0)
+        
+        self.agent.init_info(self.agent_info)
+        self.update_agentinfo()
         
     def resize(self, w, h, resize_gw=True):
         """
@@ -485,6 +502,11 @@ class GUI(Tk):
         if resize.result:
             w, h = resize.result
             self.resize(w, h)
+            
+    def cmd_setagent(self, agentclass):
+        self.agent = agentclass()
+        self.init_agent_panels()
+        self.cmd_reset()
             
     def cmd_simulate(self, event=None):
         simulate = SimulateDlg(self)
