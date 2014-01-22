@@ -15,6 +15,10 @@ class Qlearning_LO(Qlearning):
         """
         return (self.lastObs + 1) * STATE_COUNT + obs
         
+    def init_episode(self):
+        Qlearning.init_episode()
+        self.lastObs = -1
+        
     def do_step(self, S, act):
         Agent.do_step(self, S, act)
         
