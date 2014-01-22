@@ -35,7 +35,7 @@ class Agent():
         """
         Returns Q values for the given OBSERVATION state.
         """
-        return self.Q[S]
+        return self.Q[self.get_S(S)]
         
     def get_S(self, obs):
         """
