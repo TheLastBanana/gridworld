@@ -4,7 +4,6 @@ import random
 class Qlearning(Agent):
     def reset(self):
         Agent.reset(self)
-        self.Q = zeros((STATE_COUNT, ACTION_COUNT))
         self.epsilon = 0.1
         self.alpha = 0.1
         self.gamma = 1
