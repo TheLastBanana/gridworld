@@ -112,6 +112,21 @@ class GridWorld():
         if y < self.h - 1: tiles.append(ind + self.w)
         
         return tiles
+        
+    def immtileneighbours(self, ind):
+        x, y = self.indextopos(ind)
+        tiles = []
+        
+        if x > 0:
+            tiles.append(ind - 1)
+        if x < self.w - 1:
+            tiles.append(ind + 1)
+        if y > 0:
+            tiles.append(ind - self.w)
+        if y < self.h - 1:
+            tiles.append(ind + self.w)
+            
+        return tiles
             
     def tileblocked(self, x, y):
         """
