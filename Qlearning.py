@@ -58,6 +58,9 @@ class Qlearning(Agent):
         if not self.testmode and enabled:
             self.tempAlpha = self.alpha
             self.tempEpsilon = self.epsilon
+            self.alpha = 0
+            self.epsilon = 0
+        
         elif self.testmode and not enabled:
             self.alpha = self.tempAlpha
             self.epsilon = self.tempEpsilon
