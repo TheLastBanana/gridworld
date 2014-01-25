@@ -40,13 +40,29 @@ class Qlearning(Agent):
         return Sp
         
     def update_alpha(self, event=None):
+        if self.testmode: return
+        
         self.alpha = self.alpha_var.get()
     
     def update_epsilon(self, event=None):
+        if self.testmode: return
+        
         self.epsilon = self.epsilon_var.get()
     
     def update_gamma(self, event=None):
+        if self.testmode: return
+        
         self.gamma = self.gamma_var.get()
+        
+    def set_testmode(self, enabled):
+        if not self.testmode and enabled:
+            self.tempAlpha = self.alpha
+            self.tempEpsilon = self.epsilon
+        elif self.testmode and not enabled:
+            self.alpha = self.tempAlpha
+            self.epsilon = self.tempEpsilon
+        
+        Agent.set_testmode(self, enabled)
 
     def init_options(self, master):
         # Alpha

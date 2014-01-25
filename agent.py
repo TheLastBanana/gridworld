@@ -18,6 +18,7 @@ class Agent():
         """
         Resets all agent data.
         """
+        self.testmode = False
         self.run = 0
         self.episode = 0
         self.step = 0
@@ -42,6 +43,14 @@ class Agent():
         Given the observation state, returns the agent state.
         """
         return obs
+        
+    def set_testmode(self, enabled):
+        """
+        Turn test mode on or off. When in test mode, the agent should:
+        - Disable learning
+        - Behave deterministically
+        """
+        self.testmode = enabled
         
     def init_run(self):
         """
