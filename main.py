@@ -2,13 +2,21 @@ from tkinter import *
 from tkinter import simpledialog
 from tkinter import filedialog
 import agent, RandomWalk, Qlearning, Qlearning_LO, Qlearning_LA, Qlearning_LAO
-import gridworld
+import gridworld, astar
 import math
+from PIL import Image, ImageDraw, ImageFont
 
 DEFAULT_TILEW = 32
 DEFAULT_TILEH = 32
 
 TIMEOUT = 5000
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
+GREY50 = (128, 128, 128)
+IMGFONT = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 11)
 
 class ResizeDlg(simpledialog.Dialog):
     def __init__(self, master, w, h):
@@ -65,6 +73,156 @@ class SimulateDlg(simpledialog.Dialog):
         
     def apply(self):
         self.result = int(self.epentry.get())
+        
+class TestDisplay(Toplevel):
+    def __init__(self, parent, w, h, tileW, tileH, gw, tilesteps):
+        """
+        Creates the test result display.
+        """
+        Toplevel.__init__(self)
+        self.title("Test Results")
+        self.grab_set()
+        self.transient(parent)
+        
+        self.bind("<Control-s>", self.cmd_save)
+        self.bind("<Escape>", self.close)
+        
+        menu = Menu(self)
+        menu.add_command(label="Save", command=self.cmd_save)
+        self.config(menu = menu)
+        
+        cW = w * tileW
+        cH = h * tileH
+        
+        self.canvas = Canvas(self)
+        self.canvas["width"] = cW
+        self.canvas["height"] = cH
+        self.canvas["bg"] = "white"
+        self.canvas.pack()
+        
+        self.image = Image.new("RGB", (cW, cH), WHITE)
+        self.draw = ImageDraw.Draw(self.image)
+            
+        # Tiles
+        for t in range(w * h):
+            x, y = gw.indextopos(t)
+            x *= tileW
+            y *= tileH
+            
+            filled = False
+            # Draw wall
+            if gw.tiles[t] == gridworld.TILE_WALL:
+                filled = True
+                self.canvas.create_rectangle(x,
+                                             y,
+                                             x + tileW,
+                                             y + tileH,
+                                             fill="black")
+                self.draw.rectangle([x,
+                                     y,
+                                     x + tileW,
+                                     y + tileH],
+                                    fill=BLACK)
+            # Draw goal
+            elif gw.tiles[t] == gridworld.TILE_GOAL:
+                filled = True
+                self.canvas.create_line(x,
+                                        y,
+                                        x + tileW,
+                                        y + tileH,
+                                        fill="black")
+                self.canvas.create_line(x,
+                                        y + tileH,
+                                        x + tileW,
+                                        y,
+                                        fill="black")
+                self.draw.line([x,
+                                y,
+                                x + tileW,
+                                y + tileH],
+                               fill=BLACK)
+                self.draw.line([x,
+                                y + tileH,
+                                x + tileW,
+                                y],
+                               fill=BLACK)
+            
+            # Draw tiles
+            else:
+                optimal, steps = tilesteps[t]
+                midX = x + tileW * 0.5
+                midY = y + tileH * 0.5
+                
+                stepstr = ""
+                    
+                if steps < 0:
+                    colorstr = "white"
+                    color = WHITE
+                elif steps == optimal:
+                    colorstr = "green"
+                    color = GREEN
+                    stepstr = "+0"
+                elif steps == TIMEOUT:
+                    colorstr = "red"
+                    color = RED
+                else:
+                    colorstr = "yellow"
+                    color = YELLOW
+                    stepstr = "+{}".format(steps - optimal)
+                
+                self.canvas.create_rectangle(x,
+                                             y,
+                                             x + tileW,
+                                             y + tileH,
+                                             fill=colorstr)
+                self.draw.rectangle([x,
+                                     y,
+                                     x + tileW,
+                                     y + tileH],
+                                    fill=color)
+                
+                self.canvas.create_text(midX,
+                                        midY,
+                                        text=stepstr,
+                                        font=("FreeSans", 9))
+                                        
+                textW, textH = self.draw.textsize(stepstr, font=IMGFONT)
+                self.draw.text([midX - textW * 0.5,
+                                midY - textH * 0.5],
+                               stepstr,
+                               font=IMGFONT,
+                               fill=BLACK)
+        
+        # Horizontal lines
+        for x in range(gw.w):
+            tileX = x * tileW
+            self.canvas.create_line(tileX, 0, tileX, cH, fill="grey50")
+            self.draw.line([tileX, 0, tileX, cH], fill=GREY50)
+        
+        # Vertical lines
+        for y in range(gw.h):
+            tileY = y * tileH
+            self.canvas.create_line(0, tileY, cW, tileY, fill="grey50")
+            self.draw.line([0, tileY, cW, tileY], fill=GREY50)
+            
+    def cmd_save(self, event=None):
+        opts = {}
+        opts["defaultextension"] = ".png"
+        opts["filetypes"] = [("Portable Network Graphics (PNG)", ".png")]
+        opts["parent"] = self
+        opts["initialdir"] = "./results"
+        opts["title"] = "Save test result"
+        
+        f = filedialog.asksaveasfilename(**opts)
+        if not f: return
+        
+        self.save(f)
+        
+    def save(self, filename):
+        self.image.save(filename)
+        
+    def close(self, event=None):
+        self.destroy()
 
 class GUI(Tk):
     def __init__(self, w = gridworld.DEFAULT_W, h = gridworld.DEFAULT_H,
@@ -105,6 +263,7 @@ class GUI(Tk):
         self.bind("<space>", self.cmd_step)
         self.bind("<r>", self.cmd_reset)
         self.bind("<s>", self.cmd_simulate)
+        self.bind("<t>", self.cmd_test)
         
         # Set up menu bar
         self.menu = Menu(self)
@@ -131,7 +290,10 @@ class GUI(Tk):
                             command=lambda: self.cmd_setagent(Qlearning_LAO.Qlearning_LAO))
         self.menu.add_cascade(label="Agent", menu=submenu)
         
-        self.menu.add_command(label="Simulate", command=self.cmd_simulate)
+        submenu = Menu(self.menu, tearoff=0)
+        submenu.add_command(label="Simulate", command=self.cmd_simulate)
+        submenu.add_command(label="Test", command=self.cmd_test)
+        self.menu.add_cascade(label="Simulation", menu=submenu)
         
         self.config(menu = self.menu)
         
@@ -523,6 +685,51 @@ class GUI(Tk):
             
             self.update_agentinfo()
             self.redraw()
+            
+    def cmd_test(self, event=None):
+        # Find the goal
+        goal = None
+        for i, t in enumerate(self.gw.tiles):
+            if t == gridworld.TILE_GOAL:
+                goal = i
+                
+        if not goal:
+            return
+            
+        # Set the agent to testing mode
+        self.agent.set_testmode(True)
+        
+        # Check each tile
+        tilesteps = [(-1, -1)] * len(self.gw.tiles)
+        valid = self.gw.validtiles()
+        for start in valid:
+            # Run A-star to find distance
+            path = astar.find_path(self.gw.immtileneighbours,
+                                   start,
+                                   goal,
+                                   lambda tile: 1,
+                                   lambda tile: not self.gw.tileblocked(*self.gw.indextopos(tile)),
+                                   lambda a, b: astar.manhattan_dist(self.gw.indextopos(a),
+                                                                     self.gw.indextopos(b)))
+            
+            # Run the agent from this point
+            self.agent.init_episode()
+            self.gw.agentindex = start
+            steps = 0
+            while not self.step_agent():
+                steps += 1
+            
+            # Store this in the array    
+            tilesteps[start] = (len(path) - 2, steps)
+            
+        # Return the agent to normal mode
+        self.agent.set_testmode(False)
+        
+        # Display results
+        results = TestDisplay(self, self.gw.w, self.gw.h, self.tileW, self.tileH, self.gw, tilesteps)
+        
+        self.redraw()
+        self.update_agentinfo()
             
     def cmd_save(self, event=None):
         opts = {}
