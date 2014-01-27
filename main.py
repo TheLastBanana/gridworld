@@ -55,24 +55,24 @@ class ResizeDlg(simpledialog.Dialog):
 class SimulateDlg(simpledialog.Dialog):
     def __init__(self, master):
         # String variable inputs
-        self.episodes = StringVar()
+        self.steps = StringVar()
         
         # Init
         simpledialog.Dialog.__init__(self, master, "Simulate")
         
     def body(self, master):
         label = Label(master)
-        label["text"] = "Episodes:"
+        label["text"] = "Steps:"
         label.grid(row=0, column=0)
         
-        self.epentry = Entry(master)
-        self.epentry["textvariable"] = self.episodes
-        self.epentry.grid(row=0, column=1)
+        self.stepentry = Entry(master)
+        self.stepentry["textvariable"] = self.steps
+        self.stepentry.grid(row=0, column=1)
         
-        return self.epentry
+        return self.stepentry
         
     def apply(self):
-        self.result = int(self.epentry.get())
+        self.result = int(self.stepentry.get())
         
 class TestDisplay(Toplevel):
     def __init__(self, parent, w, h, tileW, tileH, gw, tilesteps):
@@ -678,13 +678,7 @@ class GUI(Tk):
         simulate = SimulateDlg(self)
         
         if simulate.result:
-            count = 0
-            
-            while count < simulate.result:
-                if self.step_agent(): count += 1
-            
-            self.update_agentinfo()
-            self.redraw()
+            self.simulate(simulate.result)
             
     def cmd_test(self, event=None):
         # Find the goal
@@ -791,6 +785,19 @@ class GUI(Tk):
             restarted = True
         
         return restarted
+        
+    def simulate(self, stepcount):
+        """
+        Simulates stepcount steps before redrawing.
+        """
+        count = 0
+        
+        while count < stepcount:
+            self.step_agent()
+            count += 1
+        
+        self.update_agentinfo()
+        self.redraw()
         
     def resume(self):
         """
