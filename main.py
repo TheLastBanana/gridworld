@@ -18,6 +18,12 @@ YELLOW = (255, 255, 0)
 GREY50 = (128, 128, 128)
 IMGFONT = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 11)
 
+agents = [("Random Walk", RandomWalk.RandomWalk),
+          ("Q-Learning", Qlearning.Qlearning),
+          ("LA Q-Learning", Qlearning_LA.Qlearning_LA),
+          ("LO Q-Learning", Qlearning_LO.Qlearning_LO),
+          ("LAO Q-Learning", Qlearning_LAO.Qlearning_LAO)]
+
 class ResizeDlg(simpledialog.Dialog):
     def __init__(self, master, w, h):
         # String variable inputs
@@ -278,16 +284,9 @@ class GUI(Tk):
         self.menu.add_cascade(label="Options", menu=submenu)
         
         submenu = Menu(self.menu, tearoff=0)
-        submenu.add_command(label="Random Walk",
-                            command=lambda: self.cmd_setagent(RandomWalk.RandomWalk))
-        submenu.add_command(label="Q-learning",
-                            command=lambda: self.cmd_setagent(Qlearning.Qlearning))
-        submenu.add_command(label="LO Q-learning",
-                            command=lambda: self.cmd_setagent(Qlearning_LO.Qlearning_LO))
-        submenu.add_command(label="LA Q-learning",
-                            command=lambda: self.cmd_setagent(Qlearning_LA.Qlearning_LA))
-        submenu.add_command(label="LAO Q-learning",
-                            command=lambda: self.cmd_setagent(Qlearning_LAO.Qlearning_LAO))
+        for name, agent_class in agents:
+            submenu.add_command(label=name,
+                                command=lambda c=agent_class: self.cmd_setagent(c))
         self.menu.add_cascade(label="Agent", menu=submenu)
         
         submenu = Menu(self.menu, tearoff=0)
