@@ -48,7 +48,11 @@ class Qlearning_LO(Qlearning):
         nextmax = 0 if Sp == TILE_GOAL else max(self.Q[self.get_S(Sp)])
         
         # Update Q for this state/action pair
-        self.Q[S][A] += self.alpha * (R + self.gamma * nextmax - self.Q[S][A])
+        delta = R + self.gamma * nextmax - self.Q[S][A]
+        self.Q[S][A] += self.alpha * delta
+        
+        if logfile:
+            logfile.write("{}\n".format(abs(delta)))
         
         return Sp
 
