@@ -509,9 +509,7 @@ class GUI(Tk):
         
         self.cur_index = -1
         
-        self.redraw()
-        self.agent.reset()
-        self.update_agentinfo()
+        self.cmd_reset()
         
     def redraw(self, event=None):
         """
@@ -667,6 +665,9 @@ class GUI(Tk):
         # Stop the agent from running
         self.pause()
         self.running = False
+        
+        # Restart log
+        self.startlog()
         
         self.redraw()
         self.update_buttons()
