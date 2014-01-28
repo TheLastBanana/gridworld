@@ -71,7 +71,7 @@ class Agent():
         self.step = 0
         self.episode += 1
 
-    def do_step(self, S, act):
+    def do_step(self, S, act, logfile=None):
         """
         Make the agent take a single step. The agent is given its current state
         and a function to call which takes an action and returns a pair of

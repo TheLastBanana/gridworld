@@ -8,8 +8,8 @@ class Qlearning(Agent):
         self.alpha = 0.1
         self.gamma = 1
     
-    def do_step(self, S, act):
-        Agent.do_step(self, S, act)
+    def do_step(self, S, act, logfile=None):
+        Agent.do_step(self, S, act, logfile)
         
         # Observation -> agent state
         S = self.get_S(S)

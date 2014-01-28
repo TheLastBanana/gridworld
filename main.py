@@ -17,6 +17,7 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 GREY50 = (128, 128, 128)
 IMGFONT = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 11)
+LOGFILE = "./log"
 
 agents = [("Random Walk", RandomWalk.RandomWalk),
           ("Q-Learning", Qlearning.Qlearning),
@@ -259,6 +260,10 @@ class GUI(Tk):
         # The grid world
         self.gw = gridworld.GridWorld()
         
+        # The log file
+        self.log = None
+        self.startlog()
+        
         # Set up window
         self.title("GridWorld")
         self.bind("<Escape>", self._close)
@@ -270,6 +275,7 @@ class GUI(Tk):
         self.bind("<r>", self.cmd_reset)
         self.bind("<s>", self.cmd_simulate)
         self.bind("<t>", self.cmd_test)
+        self.protocol("WM_DELETE_WINDOW", self._close)
         
         # Set up menu bar
         self.menu = Menu(self)
@@ -473,6 +479,18 @@ class GUI(Tk):
         
         self.agent.init_info(self.agent_info)
         self.update_agentinfo()
+        
+    def startlog(self):
+        if self.log != None:
+            self.endlog()
+            
+        self.log = open(LOGFILE, "w")
+        
+    def endlog(self):
+        if self.log == None: return
+        
+        self.log.close()
+        self.log = None
         
     def resize(self, w, h, resize_gw=True):
         """
@@ -773,7 +791,7 @@ class GUI(Tk):
         Make the agent take one step. Returns True if the agent has reached
         the goal.
         """
-        self.agent.do_step(self.gw.get_state(), self.gw.sample)
+        self.agent.do_step(self.gw.get_state(), self.gw.sample, self.log)
         
         # Start a new episode
         restarted = False
@@ -918,6 +936,7 @@ class GUI(Tk):
         self.update_tileinfo()
             
     def _close(self, event=None):
+        self.endlog()
         self.destroy()
         
 app = GUI()

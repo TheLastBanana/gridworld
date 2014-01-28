@@ -1,4 +1,5 @@
 from Qlearning import *
+import math
 
 class Qlearning_LAO(Qlearning):
     def reset(self):
@@ -24,8 +25,8 @@ class Qlearning_LAO(Qlearning):
         self.lastObs = -1
         self.lastAction = -1
         
-    def do_step(self, S, act):
-        Agent.do_step(self, S, act)
+    def do_step(self, S, act, logfile=None):
+        Agent.do_step(self, S, act, logfile)
         
         # Observation -> agent state
         tempS = S
@@ -54,7 +55,11 @@ class Qlearning_LAO(Qlearning):
         nextmax = 0 if Sp == TILE_GOAL else max(self.Q[self.get_S(Sp)])
         
         # Update Q for this state/action pair
-        self.Q[S][A] += self.alpha * (R + self.gamma * nextmax - self.Q[S][A])
+        delta = R + self.gamma * nextmax - self.Q[S][A]
+        self.Q[S][A] += self.alpha * delta
+        
+        if logfile:
+            logfile.write("{}\n".format(abs(delta)))
         
         return Sp
 

@@ -19,8 +19,8 @@ class Qlearning_LO(Qlearning):
         Qlearning.init_episode(self)
         self.lastObs = -1
         
-    def do_step(self, S, act):
-        Agent.do_step(self, S, act)
+    def do_step(self, S, act, logfile=None):
+        Agent.do_step(self, S, act, logfile)
         
         # Observation -> agent state
         tempS = S
