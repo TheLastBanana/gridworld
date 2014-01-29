@@ -792,7 +792,9 @@ class GUI(Tk):
         Make the agent take one step. Returns True if the agent has reached
         the goal.
         """
-        self.agent.do_step(self.gw.get_state(), self.gw.sample, self.log)
+        self.agent.do_step(self.gw.get_state(),
+                           self.gw.sample,
+                           None if self.agent.testmode else self.log)
         
         # Start a new episode
         restarted = False
