@@ -480,11 +480,11 @@ class GUI(Tk):
         self.agent.init_info(self.agent_info)
         self.update_agentinfo()
         
-    def startlog(self):
+    def startlog(self, name=None):
         if self.log != None:
             self.endlog()
             
-        self.log = open(LOGFILE, "w")
+        self.log = open(name if name else LOGFILE, "w")
         
     def endlog(self):
         if self.log == None: return
