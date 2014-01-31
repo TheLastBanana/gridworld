@@ -60,6 +60,7 @@ class Agent():
         self.returnSum = 0
         self.run += 1
         self.episode = -1
+        self.init_Q()
         self.init_episode()
     
     def init_episode(self):
