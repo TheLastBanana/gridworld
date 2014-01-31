@@ -81,6 +81,38 @@ class SimulateDlg(simpledialog.Dialog):
     def apply(self):
         self.result = int(self.stepentry.get())
         
+class DoRunsDlg(simpledialog.Dialog):
+    def __init__(self, master):
+        # String variable inputs
+        self.steps = StringVar()
+        self.runs = StringVar()
+        
+        # Init
+        simpledialog.Dialog.__init__(self, master, "Do Runs")
+        
+    def body(self, master):
+        label = Label(master)
+        label["text"] = "Steps:"
+        label.grid(row=0, column=0)
+        
+        label = Label(master)
+        label["text"] = "Runs:"
+        label.grid(row=1, column=0)
+        
+        self.stepentry = Entry(master)
+        self.stepentry["textvariable"] = self.steps
+        self.stepentry.grid(row=0, column=1)
+        
+        self.runentry = Entry(master)
+        self.runentry["textvariable"] = self.runs
+        self.runentry.grid(row=1, column=1)
+        
+        return self.stepentry
+        
+    def apply(self):
+        self.result = (int(self.stepentry.get()),
+                       int(self.runentry.get()))
+        
 class TestDisplay(Toplevel):
     def __init__(self, parent, w, h, tileW, tileH, gw, tilesteps):
         """
@@ -298,6 +330,7 @@ class GUI(Tk):
         submenu = Menu(self.menu, tearoff=0)
         submenu.add_command(label="Simulate", command=self.cmd_simulate)
         submenu.add_command(label="Test", command=self.cmd_test)
+        submenu.add_command(label="Do Runs", command=self.cmd_doruns)
         self.menu.add_cascade(label="Simulation", menu=submenu)
         
         self.config(menu = self.menu)
@@ -698,6 +731,12 @@ class GUI(Tk):
         if simulate.result:
             self.simulate(simulate.result)
             
+    def cmd_doruns(self, event=None):
+        dlg = DoRunsDlg(self)
+        
+        if dlg.result:
+            self.doruns(*dlg.result)
+            
     def cmd_test(self, event=None):
         # Find the goal
         goal = None
@@ -816,6 +855,26 @@ class GUI(Tk):
             self.step_agent()
             count += 1
         
+        self.update_agentinfo()
+        self.redraw()
+        
+    def doruns(self, stepcount, runcount):
+        """
+        Performs the given number of stepcount runs, storing data from
+        each in separate logs.
+        """
+        
+        for run in range(runcount):
+            self.agent.init_run()
+            self.startlog("run{}".format(run))
+            count = 0
+            
+            while count < stepcount:
+                self.step_agent()
+                count += 1
+                
+            self.endlog()
+                
         self.update_agentinfo()
         self.redraw()
         
