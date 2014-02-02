@@ -331,6 +331,7 @@ class GUI(Tk):
         submenu.add_command(label="Simulate", command=self.cmd_simulate)
         submenu.add_command(label="Test", command=self.cmd_test)
         submenu.add_command(label="Do Runs", command=self.cmd_doruns)
+        submenu.add_command(label="Average Return", command=self.cmd_avgret)
         self.menu.add_cascade(label="Simulation", menu=submenu)
         
         self.config(menu = self.menu)
@@ -737,6 +738,12 @@ class GUI(Tk):
         if dlg.result:
             self.doruns(*dlg.result)
             
+    def cmd_avgret(self, event=None):
+        dlg = DoRunsDlg(self)
+        
+        if dlg.result:
+            self.avgret(*dlg.result)
+            
     def cmd_test(self, event=None):
         # Find the goal
         goal = None
@@ -874,6 +881,28 @@ class GUI(Tk):
                 count += 1
                 
             self.endlog()
+                
+        self.update_agentinfo()
+        self.redraw()
+        
+    def avgret(self, stepcount, runcount):
+        """
+        Performs the given number of stepcount runs, then reports the average
+        return.
+        """
+        ret = 0
+        
+        for run in range(runcount):
+            self.agent.init_run()
+            count = 0
+            
+            while count < stepcount:
+                self.step_agent()
+                count += 1
+                
+            ret += self.agent.returnSum / self.agent.episode
+            
+        print(ret / runcount)
                 
         self.update_agentinfo()
         self.redraw()
