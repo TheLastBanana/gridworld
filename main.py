@@ -813,6 +813,9 @@ class GUI(Tk):
         f = filedialog.askopenfilename(**opts)
         if not f: return
         
+        self.openworld(f)
+        
+    def openworld(self, f):
         self.gw.load(f)
         self.rand_start.set(self.gw.agentstart == -1)
         self.resize(self.gw.w, self.gw.h, False)
